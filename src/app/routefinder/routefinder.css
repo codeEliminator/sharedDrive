@@ -1,0 +1,12 @@
+.wrapper{
+    -webkit-box-shadow: 0px 0px 20px 10px rgba(34, 60, 80, 0.25);
+    -moz-box-shadow: 0px 0px 20px 10px rgba(34, 60, 80, 0.25);
+    box-shadow: 0px 0px 20px 10px rgba(34, 60, 80, 0.25);
+    margin: 10px 0 10px 0px
+}
+.search-from{
+    width: 260px;
+}
+.search-to{
+    width: 260px;
+}
