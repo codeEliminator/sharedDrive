@@ -1,5 +1,6 @@
 'use client'
 import React, { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import './Registration.css'
 import 'react-phone-input-2/lib/style.css'
 import PhoneInput from "react-phone-input-2"
@@ -8,6 +9,7 @@ import "primereact/resources/themes/lara-light-cyan/theme.css";
 import CheckPasswordStrength from "@/app/(App)/helpers/CheckPasswordStrength"
 
 export default function Registration() {
+  const router = useRouter()
   const [phoneNumber, setPhoneNumber] = useState<string | undefined>(undefined);
   const [country, setCountry] = useState('')
   const [name, setName] = useState('')
@@ -17,10 +19,10 @@ export default function Registration() {
   const [passwordCheck, setPasswordCheck] = useState('')
   const [strength, setStrength] = useState(false)
   const [role, setRole] = useState('')
-
- const handleChangeOption = (evt: React.ChangeEvent<HTMLInputElement>) => {
-  setRole(evt.target.value)
- }
+  const [status, setStatus] = useState(null)
+  const handleChangeOption = (evt: React.ChangeEvent<HTMLInputElement>) => {
+    setRole(evt.target.value)
+  }
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault(); 
     const userData = {
@@ -39,7 +41,7 @@ export default function Registration() {
       body: JSON.stringify(userData),
     });
     const data = await response.json();
-    console.log(data.message);
+    data.status != 201 ? setStatus(data.status) : null
   };
   useEffect(()=>{
     const getCountry = async () => {
@@ -49,6 +51,11 @@ export default function Registration() {
     }
     getCountry()
   }, [])
+  useEffect(()=>{
+    if(status == 201){
+      router.push('/dashboard')
+    }
+  }, [status])
   return (
     <form onSubmit={handleSubmit}>
       <div className='h-lvh w-lvw bg-primary-content overflow-hidden' >
@@ -70,7 +77,9 @@ export default function Registration() {
               </label>
               <label className="input input-bordered flex items-center gap-2 my-2">
                 Password
-                <Password onChange={(evt)=>{setStrength(CheckPasswordStrength(evt.target.value));setPassword(evt.target.value)}} placeholder="Strong Password" toggleMask/>
+                <Password onChange={(evt)=>{
+                  setStrength(CheckPasswordStrength(evt.target.value));setPassword(evt.target.value)
+                  }} placeholder="Strong Password" toggleMask/>
               </label>
               <label className="input input-bordered flex items-center gap-2 my-2">
                 Repeat Password
@@ -108,8 +117,14 @@ export default function Registration() {
                   <input type="radio" id='Passenger' value='Passenger' name="role" className="ml-2 h-4 w-4" onChange={(evt)=>handleChangeOption(evt)}/>
                 </label>
               </div>
-              <button className="btn btn-neutral" disabled={!name || !surname || !email || !password || !passwordCheck || password !== passwordCheck || !phoneNumber || !strength }>Register</button>
+              <button className="btn btn-neutral" disabled={!name || !surname || !email || !password || !passwordCheck || password !== passwordCheck || !phoneNumber || !strength || !role }>Register</button>
             </div>
+            {
+              status == null ? null 
+                : 
+              status == 400 ?
+                <div className="text-red-500 text-sm">Email is registered</div> : <div className="text-red text-sm">Unexpected error! Try again later</div> 
+            }
           </div>
         </div>
       </div>
