@@ -19,6 +19,14 @@ const config: Config = {
   daisyui: {
     themes: ["light", "black"],
   },
+  "tailwindCSS.includeLanguages": {
+    "html": "html",
+    "javascript": "javascript",
+    "css": "css"
+},
+"editor.quickSuggestions": {
+    "strings": true
+}
 
 };
 export default config;

@@ -2,6 +2,7 @@
   "name": "movieapp",
   "version": "0.1.0",
   "private": true,
+  "proxy": "http://localhost:2525",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -10,10 +11,18 @@
   },
   "dependencies": {
     "@clerk/nextjs": "^4.29.5",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "mongodb": "^6.3.0",
+    "mongoose": "^8.2.0",
     "next": "14.0.0",
+    "nodemon": "^3.1.0",
+    "primereact": "^10.5.1",
     "react": "^18",
     "react-calendar": "^4.8.0",
     "react-dom": "^18",
+    "react-phone-input-2": "^2.15.1",
+    "react-phone-number-input": "^3.3.9",
     "theme-change": "^2.5.0"
   },
   "devDependencies": {
