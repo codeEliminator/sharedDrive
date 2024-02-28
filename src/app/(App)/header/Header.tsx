@@ -1,4 +1,5 @@
-import React from 'react'
+'use client'
+import React, {useState} from 'react'
 import ChangeThemeButton from '../helpers/ChangeThemeButton'
 import Link from 'next/link'
 import { useUser } from '@/context/UserContext';
@@ -6,8 +7,7 @@ import { Route } from 'next'
 
 
 export default function Header() {
-  const {user} = useUser();
-  console.log(user)
+  let {user} = useUser()
   return (
     <header style={{marginBottom: '25px'}}>
         <div className='bg-primary-content  flex items-center justify-evenly'>
