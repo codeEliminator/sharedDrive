@@ -1,8 +1,8 @@
+import { UserProvider } from "@/context/UserContext";
 import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
 import '../globals.css'
 import Header from "./header/Header";
-import { ClerkProvider } from '@clerk/nextjs'
 const monoton = Montserrat({subsets: ['latin']});
 
 export const metadata: Metadata = {
@@ -10,22 +10,23 @@ export const metadata: Metadata = {
   description: "Shared Drive project",
 };
 
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
+    <UserProvider>
       <html lang="en" data-theme="light">
         <body className={monoton.className}>
-          <Header/>
+          <Header />
           <main>
             {children}
           </main>
         </body>
       </html>
-    </ClerkProvider>
+    </UserProvider>
 
   );
 }

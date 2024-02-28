@@ -41,7 +41,7 @@ export default function Registration() {
       body: JSON.stringify(userData),
     });
     const data = await response.json();
-    data.status != 201 ? setStatus(data.status) : null
+    setStatus(data.status)
   };
   useEffect(()=>{
     const getCountry = async () => {
@@ -53,7 +53,7 @@ export default function Registration() {
   }, [])
   useEffect(()=>{
     if(status == 201){
-      router.push('/dashboard')
+      router.push('/authorization')
     }
   }, [status])
   return (

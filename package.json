@@ -8,13 +8,15 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "server": "nodemon src/server/server.js"
+    "server": "JWT_SECRET=SharedDriveTokenJWT nodemon src/server/server.js"
   },
   "dependencies": {
     "@clerk/nextjs": "^4.29.5",
     "bcrypt": "^5.1.1",
+    "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.2",
     "mongodb": "^6.3.0",
     "mongoose": "^8.2.0",
     "next": "14.0.0",
@@ -28,6 +30,7 @@
     "theme-change": "^2.5.0"
   },
   "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.6",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",

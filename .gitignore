@@ -8,7 +8,8 @@
 
 # testing
 /coverage
-
+.cert
+.key
 # next.js
 /.next/
 /out/
