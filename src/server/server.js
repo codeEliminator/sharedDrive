@@ -59,7 +59,7 @@ app.post('/auth', async (req, res) => {
     }
     const isMatch = await ComparePasswords(password, user.password, bcrypt);
     if (isMatch) {
-      const token = jwt.sign({ id: user._id, name: user.name, role: user.role, email: user.email, password: user.password }, process.env.JWT_SECRET);
+      const token = jwt.sign({ id: user._id, name: user.name, role: user.role, email: user.email, password: user.password, phoneNumber: user.phoneNumber }, process.env.JWT_SECRET);
       res.cookie('authToken', token, {
         httpOnly: true,
       });
@@ -79,7 +79,7 @@ app.get('/api/user', async (req, res) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const user = await User.findById(decoded.id);
     if (!user) return res.status(404).json({ message: 'Пользователь не найден' });
-    res.json(user);
+    return res.json(user);
 
   } catch (error) {
     res.status(500).json({ message: error });

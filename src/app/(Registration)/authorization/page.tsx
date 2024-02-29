@@ -4,11 +4,13 @@ import { useRouter } from 'next/navigation'
 import { Password } from 'primereact/password';
 import "primereact/resources/themes/lara-light-cyan/theme.css";
 import Link from 'next/link';
+import { useUser } from '@/context/UserContext';
 
 export default function Authorization() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [status, setStatus] = useState(null)
+  const { setUser} = useUser()
   const router = useRouter()
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -25,16 +27,14 @@ export default function Authorization() {
       setStatus(data.status)
       if(data.status == 201){
         router.push('/dashboard');
-        console.log('123')
       }
     } catch (error) {
       console.error('Ошибка во время запроса', error);
     }
   };
   useEffect(()=>{
-    console.log(status)
     if(status == 201){
-      router.push('/dashboard')
+      router.push('/dashboard');
     }
   }, [status])
   return (

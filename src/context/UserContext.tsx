@@ -7,6 +7,7 @@ export type UserType = {
   role: string; 
   email: string; 
   password: string;
+  phoneNumber: string;
 };
 
 export type UserContextType = {
@@ -16,7 +17,7 @@ export type UserContextType = {
 
 const UserContext = createContext<UserContextType>({
   user: null,
-  setUser: (user) => {user= user},
+  setUser: ()=>{},
 });
 
 export let useUser = () => useContext(UserContext);

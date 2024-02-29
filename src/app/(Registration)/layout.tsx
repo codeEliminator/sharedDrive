@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
 import '../globals.css'
+import { UserProvider } from "@/context/UserContext";
 const monoton = Montserrat({subsets: ['latin']});
 
 export const metadata: Metadata = {
@@ -14,6 +15,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
+    <UserProvider>
       <html lang="en" data-theme="light">
         <body className={monoton.className}>
           <main>
@@ -21,6 +23,8 @@ export default function RootLayout({
           </main>
         </body>
       </html>
+    </UserProvider>
+      
 
   );
 }

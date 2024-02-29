@@ -1,0 +1,13 @@
+
+.content-item{
+  height: 50px;
+  flex: 1 1 0px;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.content-item.active{
+  border-bottom: solid 6px hsla(250, 100%, 83%, 1);
+}
