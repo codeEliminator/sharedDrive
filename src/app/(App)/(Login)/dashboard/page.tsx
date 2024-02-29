@@ -4,7 +4,6 @@ import { useUser } from '@/context/UserContext';
 
 const Dashboard = () => {
   const { setUser } = useUser();
-
   useEffect(() => {
     const fetchUserData = async () => {
       console.log('dada')

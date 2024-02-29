@@ -34,6 +34,7 @@ const userSchema = new mongoose.Schema({
 const User = mongoose.model('User', userSchema);
 
 app.post('/register', async (req, res) => {
+  console.log('register')
   try {
     const userExists = await User.findOne({ email: req.body.email }); 
     if (userExists) {
@@ -49,6 +50,7 @@ app.post('/register', async (req, res) => {
   }
 });
 app.post('/auth', async (req, res) => {
+  console.log('auth')
   const { email, password } = req.body;
   try {
     const user = await User.findOne({ email });
@@ -72,7 +74,7 @@ app.post('/auth', async (req, res) => {
 });
 app.get('/api/user', async (req, res) => {
   const token = req.cookies.authToken;
-  console.log(123)
+  console.log('api/user')
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const user = await User.findById(decoded.id);
@@ -83,7 +85,11 @@ app.get('/api/user', async (req, res) => {
     res.status(500).json({ message: error });
   }
 });
-
+app.post('/logout', async (req, res)=>{
+  console.log('logout')
+  res.cookie('authToken', '', { expires: new Date(0) });
+  res.status(200).json({ message: 'Вы успешно вышли из системы', status: 200 });
+})
 app.delete('/deleteAllUsers', async (req, res) => {
   try {
     await User.deleteMany({}); 

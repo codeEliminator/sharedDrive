@@ -8,6 +8,9 @@ import { Route } from 'next'
 
 export default function Header() {
   let {user} = useUser()
+  const handleLogout = () =>{
+    console.log(123)
+  }
   return (
     <header style={{marginBottom: '25px'}}>
         <div className='bg-primary-content  flex items-center justify-evenly'>
@@ -22,7 +25,14 @@ export default function Header() {
             </button>
             <div className='btn btn-ghost text-lg ml-1 font-normal'>
               {
-                user ? <div>{user.name}</div> : <Link href='/authorization'> <input value='Sign in' type='button' /> </Link>
+                user ? 
+                <div className="dropdown dropdown-end">
+                  <div tabIndex={0} role="button" className=" m-1">{user.name}</div>
+                    <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
+                      <Link href='/dashboard'><li><a>Dashboard</a></li></Link>
+                      <Link href='/logout'><li><a className='text-red-500'>Log Out</a></li></Link>
+                  </ul>
+              </div> : <Link href='/authorization'> <input value='Sign in' type='button' /> </Link>
               }
               
             </div>
