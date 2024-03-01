@@ -30,10 +30,10 @@ export default function Header() {
               user ? 
               <div className="dropdown dropdown-end">
                 <div tabIndex={0} role="button" className=" m-1">{user.name}</div>
-                  <ul tabIndex={0} className="dropdown-content z-[100] menu p-2 shadow bg-base-100 rounded-box w-52">
-                    <Link href='/dashboard'><li><a>Dashboard</a></li></Link>
-                    <Link href='/dashboard/profile'><li><a>Profile</a></li></Link>
-                    <Link href='/logout'><li><a className='text-red-500 font-bold'>Log Out</a></li></Link>
+                  <ul tabIndex={0} className="dropdown-content z-[1000] menu p-2 shadow bg-base-100 rounded-box w-52">
+                    <li><a><Link href='/dashboard'>Dashboard</Link></a></li>
+                    <li><a><Link href='/dashboard/profile'>Profile</Link></a></li>
+                    <li><a className='text-red-500 font-bold'><Link href='/logout'>Log Out</Link></a></li>
                 </ul>
               </div> : 
               <Link href='/authorization'> <input value='Sign in' type='button' /> </Link>

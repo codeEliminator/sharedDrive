@@ -43,7 +43,10 @@ export default function Authorization() {
         <div className="flex items-center justify-center h-full">
           <div className='bg-white p-5 rounded border-2  shadowBox ' style={{width: '450px', height: '550px', borderRadius: '36px 36px 36px 36px'}}>
             <div className='w-full h-full flex items-center flex-col '>
-              <div className="text-xl mb-2">Welcome to Shared Drive</div>
+              <div className="flex-row items-center ">
+                <Link href='/'><img src="/right-arrow.png" alt="" className="w-3 h-3 rotate-180"/></Link>
+                <div className="text-xl">Welcome to Shared Drive</div>
+              </div>
                 <div className='flex flex-col'>
                   <label className="input input-bordered flex items-center gap-2 my-2">
                     Email

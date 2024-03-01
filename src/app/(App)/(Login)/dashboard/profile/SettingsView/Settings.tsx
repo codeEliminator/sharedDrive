@@ -1,4 +1,5 @@
 
+import Link from 'next/link'
 import React from 'react'
 
 const Settings = () => {
@@ -73,12 +74,14 @@ const Settings = () => {
         <hr className='my-2'/>
         <ul className='list-none w-full'>
           <li>
-            <div className='flex flex-row justify-between p-4 rounded-full items-center hover:bg-slate-300 ease-out duration-150  hover:p-6 '>
-              <div className='text-lg flex justify-between w-full items-center'>
-                <span className='text-red-500 italic'>Exit</span>
-                <img src="/right-arrow.png" alt="" className='w-3 h-3'/>
+            <Link href='/logout'>
+              <div className='flex flex-row justify-between p-4 rounded-full items-center hover:bg-slate-300 ease-out duration-150  hover:p-6 '>
+                <div className='text-lg flex justify-between w-full items-center'>
+                  <span className='text-red-500 italic'>Exit</span>
+                  <img src="/right-arrow.png" alt="" className='w-3 h-3'/>
+                </div>
               </div>
-            </div>
+            </Link>
           </li>
         </ul>
         <hr className='my-2'/>

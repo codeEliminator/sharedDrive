@@ -7,6 +7,8 @@ import PhoneInput from "react-phone-input-2"
 import { Password } from 'primereact/password';
 import "primereact/resources/themes/lara-light-cyan/theme.css";
 import CheckPasswordStrength from "@/app/(App)/helpers/CheckPasswordStrength"
+import Link from "next/link"
+
 
 export default function Registration() {
   const router = useRouter()
@@ -61,7 +63,10 @@ export default function Registration() {
       <div className='h-lvh w-lvw bg-primary-content overflow-hidden' >
         <div className="flex items-center justify-center h-full">
           <div className='bg-white p-5 rounded border-2  shadowBox' style={{width: '450px', height: '550px', borderRadius: '36px 36px 36px 36px'}}>
-            <div className="text-xl mb-2">Welcome to Shared Drive</div>
+            <div className="flex-row items-center mb-2">
+              <Link href='/authorization'><img src="/right-arrow.png" alt="" className="w-3 h-3 rotate-180 mx-2"/></Link>
+              <div className="text-xl">Welcome to Shared Drive</div>
+            </div>
             <div className="flex flex-col">
               <label className="input input-bordered flex items-center gap-2">
                 Name
