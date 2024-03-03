@@ -8,6 +8,7 @@ export type UserType = {
   email: string; 
   password: string;
   phoneNumber: string;
+  emailVerified: boolean;
 };
 
 export type UserContextType = {

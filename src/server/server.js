@@ -7,6 +7,8 @@ const bcrypt = require('bcrypt')
 const ComparePasswords  = require('../app/(Registration)/helpers/BcryptCompare');
 const cookieParser = require('cookie-parser');
 const jwt = require('jsonwebtoken')
+const crypto = require('crypto')
+const nodemailer = require('nodemailer')
 
 const corsOptions = {
   origin: 'http://localhost:3000', 
@@ -29,7 +31,8 @@ const userSchema = new mongoose.Schema({
   email: String,
   password: String,
   phoneNumber: String,
-  role: String
+  role: String,
+  emailVerified: Boolean
 });
 const User = mongoose.model('User', userSchema);
 
@@ -42,7 +45,7 @@ app.post('/register', async (req, res) => {
     }
     const hashedPassword = await bcrypt.hash(req.body.password, 10);
     req.body.password = hashedPassword
-    const newUser = new User(req.body);
+    const newUser = new User({...req.body, emailVerified: false});
     await newUser.save(); 
     res.status(201).json({ message: 'Пользователь зарегистрирован', status: 201 });
   } catch (error) {
@@ -90,6 +93,49 @@ app.post('/logout', async (req, res)=>{
   res.cookie('authToken', '', { expires: new Date(0) });
   res.status(200).json({ message: 'Вы успешно вышли из системы', status: 200 });
 })
+app.post('/email-verify', async (req, res) => {
+  console.log('email-verify')
+
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: process.env.GMAIL_USER,
+      pass: process.env.GMAIL_PASS
+    }
+  });
+  const token = req.cookies.authToken;
+  await User.updateOne({ email: req.body.email }, { verifyToken: token });
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.id);
+    transporter.sendMail({
+      from: 'no-reply@sharedDrive.com',
+      to: user.email,
+      subject: 'Email Verification',
+      html: `<div>Please verify your email by clicking on the following <span><a href='http://localhost:2525/getEmailVerified?token=${token}'>link</a></span></div> `,
+    });
+    res.status(200).json({message: 'Link has been sent', status: 200})
+  }
+  catch(err){
+    console.log(err)
+  }
+})
+app.get('/getEmailVerified', async (req, res) => {
+  try {
+    const { token } = req.query;
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.id);
+    if (!user) return res.status(404).send('User not found');
+    await user.updateOne({$set: {emailVerified: true}})
+    await user.save();
+    res.status(200).json({message: 'Email verified, you will redirected soon',status: 200});
+  } catch (error) {
+    if (error instanceof jwt.JsonWebTokenError) {
+      return res.status(401).send('Invalid or expired token');
+    }
+    res.status(500).send('Internal server error');
+  }
+});
 app.delete('/deleteAllUsers', async (req, res) => {
   try {
     await User.deleteMany({}); 

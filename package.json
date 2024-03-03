@@ -8,7 +8,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "server": "JWT_SECRET=SharedDriveTokenJWT nodemon src/server/server.js"
+    "server": ""
   },
   "dependencies": {
     "@clerk/nextjs": "^4.29.5",
@@ -20,6 +20,7 @@
     "mongodb": "^6.3.0",
     "mongoose": "^8.2.0",
     "next": "14.0.0",
+    "nodemailer": "^6.9.11",
     "nodemon": "^3.1.0",
     "primereact": "^10.5.1",
     "react": "^18",
