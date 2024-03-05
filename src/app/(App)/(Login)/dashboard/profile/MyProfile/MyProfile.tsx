@@ -8,11 +8,10 @@ import Link from 'next/link'
 const MyProfile = () => {
   const {user} = useUser()
   const [active, setActive] = useState(false)
-  const [message, setMessage] = useState('')
-  const modalFunc = (message: string) => {
+  const [message, setMessage] = useState<React.ReactNode>('');
+  const modalFunc = (message: React.ReactNode) => {
     setMessage(message)
     setActive(true)
-    setTimeout(()=>{setActive(false)}, 2000)
   }
   const verifyEmail = () => {
     if(user?.emailVerified == true){
@@ -29,6 +28,53 @@ const MyProfile = () => {
       }
       getEmailVerified()
     }
+  }
+  const fileInputFunc = () => {
+    const FileInputForm = () => {
+      const [image, setImage] = useState('')
+      const fileChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
+          var reader = new FileReader()
+          reader.readAsDataURL(evt.target.files![0])
+          reader.onload = () => {
+            if (typeof reader.result === 'string')
+              setImage(reader.result);
+          }
+      }
+      const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        if (!image) {
+          console.log('No file selected');
+          return;
+        }
+        try {
+          const response = await fetch('http://localhost:2525/uploadFile', {
+            method: 'POST',
+            credentials: 'include',
+            headers:{
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({base64: image, email: user?.email}), 
+          });
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          const data = await response.json();
+          console.log(data);
+        } catch (error) {
+          console.error('Error:', error);
+        }
+      };
+      
+      return (
+        <>
+        <form onSubmit={(event) => handleSubmit(event)} className='flex flex-col'>
+          <input id='file' type="file" className="file-input w-full max-w-xs" accept='image/*' onChange={fileChange}/>
+          <button className="btn btn-active btn-primary">Sumbit</button>
+        </form>
+        </>
+      )
+    }
+    modalFunc(<FileInputForm></FileInputForm>)
   }
   return (
     <>
@@ -55,7 +101,7 @@ const MyProfile = () => {
             </Link>
           </li>
           <li>
-            <div className='rounded-full p-4 hover:bg-slate-300 ease-out duration-150 hover:p-6 justify-between items-center flex-row  cursor-pointer'>
+            <div className='rounded-full p-4 hover:bg-slate-300 ease-out duration-150 hover:p-6 justify-between items-center flex-row  cursor-pointer' onClick={fileInputFunc}>
               <span className='text-lg'>Add Profile Picture</span>
               <img src="/right-arrow.png" alt="" className='w-3 h-3 mr-2'/>
                 {/* <span className='mr-2'>

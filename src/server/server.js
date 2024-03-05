@@ -6,18 +6,16 @@ const port = 2525;
 const bcrypt = require('bcrypt')
 const ComparePasswords  = require('../app/(Registration)/helpers/BcryptCompare');
 const cookieParser = require('cookie-parser');
+const bodyParser = require('body-parser');
 const jwt = require('jsonwebtoken')
-const crypto = require('crypto')
+require('./imageDetails')
 const nodemailer = require('nodemailer')
-
 const corsOptions = {
   origin: 'http://localhost:3000', 
   credentials: true, 
 };
-
 app.use(cors(corsOptions));
-
-app.use(express.json());
+app.use(express.json({limit: '50mb'}));
 app.use(cookieParser()); 
 
 mongoose.connect('mongodb+srv://admin:admin@accountdatabase.ddvfqdh.mongodb.net/accountdatabase?retryWrites=true&w=majority', {
@@ -34,6 +32,8 @@ const userSchema = new mongoose.Schema({
   role: String,
   emailVerified: Boolean
 });
+
+const ImageDetails = mongoose.model('ImageDetails')
 const User = mongoose.model('User', userSchema);
 
 app.post('/register', async (req, res) => {
@@ -45,7 +45,7 @@ app.post('/register', async (req, res) => {
     }
     const hashedPassword = await bcrypt.hash(req.body.password, 10);
     req.body.password = hashedPassword
-    const newUser = new User({...req.body, emailVerified: false});
+    const newUser = new User({...req.body, emailVerified: false, rating: 5.0});
     await newUser.save(); 
     res.status(201).json({ message: 'Пользователь зарегистрирован', status: 201 });
   } catch (error) {
@@ -136,6 +136,22 @@ app.get('/getEmailVerified', async (req, res) => {
     res.status(500).send('Internal server error');
   }
 });
+app.post('/uploadFile', async (req, res) => {
+  const { base64, email } = req.body;
+  console.log(base64, email)
+  try {
+    const newImageDetail = new ImageDetails({
+      image: base64,
+      email: email
+    });
+    await newImageDetail.save();
+    res.status(200).json({ message: "Изображение успешно сохранено" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Ошибка при сохранении изображения" });
+  }
+});
+
 app.delete('/deleteAllUsers', async (req, res) => {
   try {
     await User.deleteMany({}); 

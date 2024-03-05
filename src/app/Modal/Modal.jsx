@@ -5,7 +5,7 @@ export default function Modal({active, setActive, children}) {
     
         <div className={active? "modal active": "modal"} onClick={() => setActive(false)}>
             <div className={active? "modalContent active": "modalContent"} onClick = {(evt) => evt.stopPropagation()}>
-              <div className='content-item'>
+              <div className='modal-content-item'>
                 {children}
               </div>
             </div>

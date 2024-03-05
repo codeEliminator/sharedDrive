@@ -29,9 +29,11 @@
 .modalContent.active{
   transform: scale(1);
 }
-.content-item{
-  width: 100px;
-  height: 100px;
-  background-color: white;
-  
+.modal-content-item{
+  width: 350px;
+  height: 350px;
+  background-color: lightgray;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
