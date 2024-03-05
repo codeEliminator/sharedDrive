@@ -46,6 +46,7 @@ export default function Registration() {
     setStatus(data.status)
   };
   useEffect(()=>{
+    localStorage.removeItem('token')
     const getCountry = async () => {
       await fetch('https://ipapi.co/json/')
       .then(response => response.json())

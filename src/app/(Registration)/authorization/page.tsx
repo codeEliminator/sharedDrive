@@ -10,9 +10,10 @@ export default function Authorization() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [status, setStatus] = useState(null)
-  const { setUser} = useUser()
   const router = useRouter()
-
+  useEffect(()=>{
+    localStorage.removeItem('token')
+  }, [])
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     try {
@@ -70,7 +71,9 @@ export default function Authorization() {
                   <Link href={'/registration'}>
                     <div className='link text-lg text-blue-300 hover:text-blue-500'> Don't have an Account?</div>
                   </Link>
-                  
+                  <Link href={'/authorization/forgot-password'}>
+                    <div className='link text-lg text-blue-300 hover:text-blue-500'>Forgot Password?</div>
+                  </Link>
               </div>
             </div>
           </div>

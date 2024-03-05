@@ -8,6 +8,7 @@ const ComparePasswords  = require('../app/(Registration)/helpers/BcryptCompare')
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const jwt = require('jsonwebtoken')
+const {createRandomString} = require('./helpers/createRandomString')
 require('./imageDetails')
 const nodemailer = require('nodemailer')
 const corsOptions = {
@@ -145,22 +146,55 @@ app.post('/uploadFile', async (req, res) => {
       email: email
     });
     await newImageDetail.save();
-    res.status(200).json({ message: "Изображение успешно сохранено" });
+    res.status(200).json({ message: "Изображение успешно сохранено", status: 200 });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Ошибка при сохранении изображения" });
   }
 });
-
-app.delete('/deleteAllUsers', async (req, res) => {
-  try {
-    await User.deleteMany({}); 
-    res.status(200).json({ message: 'Все пользователи удалены' });
-    console.log('Все пользователи удалены')
-  } catch (error) {
-    res.status(500).json({ message: 'Произошла ошибка при удалении пользователей', error: error.message });
+app.post('/password-recovery', async (req, res) => {
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: process.env.GMAIL_USER,
+      pass: process.env.GMAIL_PASS
+    }
+  });
+  try{
+    const user = await User.findOne({email: req.body.email})
+    const token = createRandomString(32)
+    if(user){
+      transporter.sendMail({
+        from: 'no-reply@sharedDrive.com',
+        to: user.email,
+        subject: 'Password Recovery',
+        html: `<div>Get your recovery page <a href='http://localhost:3000/authorization/forgot-password?recoveryPasswordToken=${token}&email=${req.body.email}'>here</a></div>`,
+      });
+      res.status(200).json({message: 'Link has been sent', status: 200, token: token})
+    }
+  } catch(err){
+    console.log(err)
   }
-});
+})
+app.post('/userPasswordChange', async (req, res) => {
+  const user = await User.findOne({email: req.body.email})
+  if(user){
+    const hashedPassword = await bcrypt.hash(req.body.password, 10);
+    user.password = hashedPassword;
+    await user.save();
+    res.status(200).json({status: 200})
+  }
+
+})
+// app.delete('/deleteAllUsers', async (req, res) => {
+//   try {
+//     await ImageDetails.deleteMany({}); 
+//     res.status(200).json({ message: 'Все пользователи удалены' });
+//     console.log('Все пользователи удалены')
+//   } catch (error) {
+//     res.status(500).json({ message: 'Произошла ошибка при удалении пользователей', error: error.message });
+//   }
+// });
 app.listen(port, () => {
   console.log(`Сервер запущен на http://localhost:${port}`);
 });

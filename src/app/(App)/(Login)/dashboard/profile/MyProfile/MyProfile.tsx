@@ -3,11 +3,11 @@ import React, {useState} from 'react'
 import { useUser } from '@/context/UserContext'
 import Modal from '../../../../../Modal/Modal'
 import Link from 'next/link'
-
+import FileInputForm from './FileInputForm'
 
 const MyProfile = () => {
   const {user} = useUser()
-  const [active, setActive] = useState(false)
+  const [active, setActive] = useState<boolean>(false)
   const [message, setMessage] = useState<React.ReactNode>('');
   const modalFunc = (message: React.ReactNode) => {
     setMessage(message)
@@ -30,58 +30,15 @@ const MyProfile = () => {
     }
   }
   const fileInputFunc = () => {
-    const FileInputForm = () => {
-      const [image, setImage] = useState('')
-      const fileChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
-          var reader = new FileReader()
-          reader.readAsDataURL(evt.target.files![0])
-          reader.onload = () => {
-            if (typeof reader.result === 'string')
-              setImage(reader.result);
-          }
-      }
-      const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
-        if (!image) {
-          console.log('No file selected');
-          return;
-        }
-        try {
-          const response = await fetch('http://localhost:2525/uploadFile', {
-            method: 'POST',
-            credentials: 'include',
-            headers:{
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({base64: image, email: user?.email}), 
-          });
-          if (!response.ok) {
-            throw new Error('Network response was not ok');
-          }
-          const data = await response.json();
-          console.log(data);
-        } catch (error) {
-          console.error('Error:', error);
-        }
-      };
-      
-      return (
-        <>
-        <form onSubmit={(event) => handleSubmit(event)} className='flex flex-col'>
-          <input id='file' type="file" className="file-input w-full max-w-xs" accept='image/*' onChange={fileChange}/>
-          <button className="btn btn-active btn-primary">Sumbit</button>
-        </form>
-        </>
-      )
-    }
-    modalFunc(<FileInputForm></FileInputForm>)
+    modalFunc(<FileInputForm setActive={setActive}></FileInputForm>)
   }
   return (
     <>
     {
-      active == true ? <Modal active={active} setActive={setActive}>
-      <div>{message}</div>
-    </Modal>  : null
+      active == true ? 
+      <Modal active={active} setActive={setActive}>
+        <div>{message}</div>
+      </Modal>  : null
     }
       
       <div className='w-3/5 flex items-center justify-center mt-5'>
