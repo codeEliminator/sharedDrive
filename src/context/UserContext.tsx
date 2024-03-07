@@ -10,6 +10,7 @@ export type UserType = {
   phoneNumber: string;
   emailVerified: boolean;
   rating: Number;
+  randomBytes: String;
 };
 
 export type UserContextType = {

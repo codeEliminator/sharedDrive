@@ -3,9 +3,12 @@ import React, {useState, useEffect} from 'react'
 import Link from 'next/link'
 import { useUser } from '@/context/UserContext';
 import fetchUserData from '../helpers/GetUserData';
+import { Dropdown } from 'flowbite-react';
+import { useRouter } from 'next/navigation';
 
 export default function Header() {
   const {user, setUser} = useUser()
+  const router = useRouter()
   useEffect(() => {
     const getUserData = async() => {
       const data = await fetchUserData()
@@ -18,7 +21,7 @@ export default function Header() {
       <div className='bg-primary-content  flex items-center justify-evenly'>
         <Link href='/'><img src='/logo2.png' alt="logo" className='h-20 p-2' /></Link>
         <div>
-          <span className='text-neutral font-medium mr-6 link'>Shared Drive</span>
+          <span className='text-neutral font-medium mr-6 link' onClick={()=>console.log(user)}>Shared Drive</span>
           <span className='text-neutral font-medium link '>Bus</span>
         </div>
         <div className='flex flex-row justify-center items-center'>
@@ -35,7 +38,8 @@ export default function Header() {
                     <Link href='/dashboard/profile'><li><a>Profile</a></li></Link>
                     <Link href='/logout'><li><a className='text-red-500 font-bold'>Log Out</a></li></Link>
                 </ul>
-              </div> : 
+              </div>
+               : 
               <Link href='/authorization'> <input value='Sign in' type='button' /> </Link>
             }
             

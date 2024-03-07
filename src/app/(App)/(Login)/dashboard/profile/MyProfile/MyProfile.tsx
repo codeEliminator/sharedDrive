@@ -1,5 +1,5 @@
 'use client'
-import React, {useState} from 'react'
+import React, {useState, useEffect} from 'react'
 import { useUser } from '@/context/UserContext'
 import Modal from '../../../../../Modal/Modal'
 import Link from 'next/link'
@@ -8,6 +8,7 @@ import FileInputForm from './FileInputForm'
 const MyProfile = () => {
   const {user} = useUser()
   const [active, setActive] = useState<boolean>(false)
+  const [avatar, setAvatar] = useState('')
   const [message, setMessage] = useState<React.ReactNode>('');
   const modalFunc = (message: React.ReactNode) => {
     setMessage(message)
@@ -32,6 +33,15 @@ const MyProfile = () => {
   const fileInputFunc = () => {
     modalFunc(<FileInputForm setActive={setActive}></FileInputForm>)
   }
+  useEffect(()=>{
+    const imageName = `${user?.name}____${user?.email}___${user?.randomBytes}.png`;
+    const getAvatar = async () => {
+      const response = await fetch(`http://localhost:2525/image/${imageName}`)
+      setAvatar(response.url)
+    }
+    getAvatar()
+  }, [user])
+  
   return (
     <>
     {
@@ -51,7 +61,8 @@ const MyProfile = () => {
                   <span className='text-sm opacity-50'>Newbie</span>
                 </span>
                 <span className='flex flex-row items-center'>
-                  <img src='/userProfile.png' alt="" className='w-12 h-12'/>
+                  {!avatar ? <img src='/userProfile.png' alt="" className='w-12 h-12'/> : <img src={avatar} alt="" className='w-12 h-12 rounded-full'/>}
+                  
                   <img src="/right-arrow.png" alt="" className='w-5 h-5 ml-4'/>
                 </span>
               </div>

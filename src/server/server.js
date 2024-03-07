@@ -8,9 +8,12 @@ const ComparePasswords  = require('../app/(Registration)/helpers/BcryptCompare')
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const jwt = require('jsonwebtoken')
+const multer = require('multer');
+const path = require('path');
 const {createRandomString} = require('./helpers/createRandomString')
 require('./imageDetails')
-const nodemailer = require('nodemailer')
+const nodemailer = require('nodemailer');
+const { randomBytes } = require('crypto');
 const corsOptions = {
   origin: 'http://localhost:3000', 
   credentials: true, 
@@ -18,6 +21,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json({limit: '50mb'}));
 app.use(cookieParser()); 
+app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
 mongoose.connect('mongodb+srv://admin:admin@accountdatabase.ddvfqdh.mongodb.net/accountdatabase?retryWrites=true&w=majority', {
   useNewUrlParser: true,
@@ -31,11 +35,45 @@ const userSchema = new mongoose.Schema({
   password: String,
   phoneNumber: String,
   role: String,
-  emailVerified: Boolean
+  emailVerified: Boolean,
+  rating: Number,
+  randomBytes: String,
 });
 
-const ImageDetails = mongoose.model('ImageDetails')
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, path.join(__dirname, 'public/uploads/'))
+  },
+  filename: function (req, file, cb) {
+    cb(null, file.originalname+'.png')
+  }
+});
+const upload = multer({ storage: storage });
+
+// const ImageDetails = mongoose.model('ImageDetails')
 const User = mongoose.model('User', userSchema);
+
+app.post('/upload', upload.single('file'), (req, res) => {
+  if (req.file) {
+    console.log('Файл сохранен:', req.file.path);
+    res.send('Файл успешно загружен');
+  } else {
+    console.log('err')
+    res.status(400).send('Ошибка загрузки файла');
+  }
+});
+app.get('/image/:filename', (req, res) => {
+  const filename = req.params.filename;
+  const filePath = path.join(__dirname, 'public/uploads/', filename);
+
+  res.sendFile(filePath, err => {
+    if (err) {
+      res.status(404).send('Изображение не найдено');
+    }
+  });
+});
+
 
 app.post('/register', async (req, res) => {
   console.log('register')
@@ -46,7 +84,7 @@ app.post('/register', async (req, res) => {
     }
     const hashedPassword = await bcrypt.hash(req.body.password, 10);
     req.body.password = hashedPassword
-    const newUser = new User({...req.body, emailVerified: false, rating: 5.0});
+    const newUser = new User({...req.body, emailVerified: false, rating: 5.0, randomBytes: createRandomString(30)});
     await newUser.save(); 
     res.status(201).json({ message: 'Пользователь зарегистрирован', status: 201 });
   } catch (error) {
@@ -63,7 +101,7 @@ app.post('/auth', async (req, res) => {
     }
     const isMatch = await ComparePasswords(password, user.password, bcrypt);
     if (isMatch) {
-      const token = jwt.sign({ id: user._id, name: user.name, role: user.role, email: user.email, password: user.password, phoneNumber: user.phoneNumber }, process.env.JWT_SECRET);
+      const token = jwt.sign({ id: user._id, name: user.name, role: user.role, email: user.email, password: user.password, phoneNumber: user.phoneNumber, randomBytes: user.randomBytes, rating: user.rating }, process.env.JWT_SECRET);
       res.cookie('authToken', token, {
         httpOnly: true,
       });

@@ -1,9 +1,18 @@
 'use client'
-import React from 'react'
+import React, {useEffect, useState} from 'react'
 import { useUser } from '@/context/UserContext'
 
 const ProfileView = () => {
+  const [avatar, setAvatar] = useState('')
   const {user} = useUser()
+  useEffect(()=>{
+    const imageName = `${user?.name}____${user?.email}___${user?.randomBytes}.png`;
+    const getAvatar = async () => {
+      const response = await fetch(`http://localhost:2525/image/${imageName}`)
+      setAvatar(response.url)
+    }
+    getAvatar()
+  }, [user])
   return (
     <>
       <div className='flex items-center justify-center'>
@@ -11,7 +20,7 @@ const ProfileView = () => {
           <div className='flex flex-row justify-between'>
             <div className='flex-row items-center'>
               <div>
-                <img src="/userProfile.png" alt="" className='w-12 h-12 mr-2'/>
+                {!avatar ? <img src='/userProfile.png' alt="" className='w-12 h-12 mr-2'/> : <img src={avatar} alt="" className='w-12 h-12 mr-2 rounded-full'/>}
               </div>
               <div className='text-3xl' >
                 <span>{user?.name}</span>
