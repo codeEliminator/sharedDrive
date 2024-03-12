@@ -4,7 +4,6 @@ import { useRouter } from 'next/navigation'
 import { Password } from 'primereact/password';
 import "primereact/resources/themes/lara-light-cyan/theme.css";
 import Link from 'next/link';
-import { useUser } from '@/context/UserContext';
 
 export default function Authorization() {
   const [email, setEmail] = useState('')
@@ -53,7 +52,7 @@ export default function Authorization() {
                     Email
                     <input type="email" className="grow" placeholder="Your Email" onChange={(evt)=>setEmail(evt.target.value)}/>
                   </label>
-                  <label className="input input-bordered flex items-center gap-2 my-2">
+                  <label className="input input-bordered flex items-center gap-2 my-2 ">
                     Password
                     <Password onChange={(evt)=>{setPassword(evt.target.value)}} placeholder="Enter Password" feedback={false} toggleMask/>
                   </label>
@@ -61,7 +60,7 @@ export default function Authorization() {
                   {
                     status == null ? null 
                       : 
-                    status == 400 ?
+                    status == 400 ? 
                       <div className="text-red-500 text-lg">There is no User with such Email</div> : status == 405 ? 
                       <div className="text-red-500 text-lg">Incorrect password</div> 
                       :

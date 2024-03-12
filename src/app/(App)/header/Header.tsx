@@ -3,7 +3,6 @@ import React, {useState, useEffect} from 'react'
 import Link from 'next/link'
 import { useUser } from '@/context/UserContext';
 import fetchUserData from '../helpers/GetUserData';
-import { Dropdown } from 'flowbite-react';
 import { useRouter } from 'next/navigation';
 
 export default function Header() {
@@ -17,7 +16,7 @@ export default function Header() {
     getUserData()
   }, []);
   return (
-    <header style={{marginBottom: '25px'}}>
+    <header >
       <div className='bg-primary-content  flex items-center justify-evenly'>
         <Link href='/'><img src='/logo2.png' alt="logo" className='h-20 p-2' /></Link>
         <div>
@@ -34,9 +33,10 @@ export default function Header() {
               <div className="dropdown dropdown-end">
                 <div tabIndex={0} role="button" className=" m-1">{user.name}</div>
                   <ul tabIndex={0} className="dropdown-content z-[1000] menu p-2 shadow bg-base-100 rounded-box w-52">
-                    <Link href='/dashboard'><li><a>Dashboard</a></li></Link>
-                    <Link href='/dashboard/profile'><li><a>Profile</a></li></Link>
-                    <Link href='/logout'><li><a className='text-red-500 font-bold'>Log Out</a></li></Link>
+                    <Link href='/dashboard' className='z-[1000]'><li><a>Dashboard</a></li></Link>
+                    <Link href='/dashboard/profile' className='z-[1000]'><li><a>Profile</a></li></Link>
+                    <Link href='/rideCreator' className='z-[1000]'><li><a>Make A Ride</a></li></Link>
+                    <Link href='/logout' className='z-[1000]'><li><a className='text-red-500 font-bold'>Log Out</a></li></Link>
                 </ul>
               </div>
                : 

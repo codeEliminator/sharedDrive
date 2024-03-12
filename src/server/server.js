@@ -11,9 +11,11 @@ const jwt = require('jsonwebtoken')
 const multer = require('multer');
 const path = require('path');
 const {createRandomString} = require('./helpers/createRandomString')
+const fetch = require('node-fetch');
 require('./imageDetails')
 const nodemailer = require('nodemailer');
 const { randomBytes } = require('crypto');
+const { time } = require('console');
 const corsOptions = {
   origin: 'http://localhost:3000', 
   credentials: true, 
@@ -39,7 +41,18 @@ const userSchema = new mongoose.Schema({
   rating: Number,
   randomBytes: String,
 });
-
+const tripSchema = new mongoose.Schema({
+  userEmail: String,
+  userName: String,
+  startDate: Date,
+  startTime: String,
+  startAddress: String,
+  endAddress: String,
+  selectedRouteIndex: Number,
+},
+{
+  collection: "TripSchema"
+})
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -51,9 +64,18 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage: storage });
 
-// const ImageDetails = mongoose.model('ImageDetails')
 const User = mongoose.model('User', userSchema);
+const Trip = mongoose.model('Trip', tripSchema);
 
+app.post('/api/trips/', async (req, res)=> {
+  try{
+    const newTrip = new Trip(req.body)
+    await newTrip.save(); 
+    res.status(201).json({ message: 'Trip Added', status: 201 });
+  } catch (error) {
+    res.status(500).json({ message: 'Ошибка при Trip Added', error: error.message });
+  }
+})
 app.post('/upload', upload.single('file'), (req, res) => {
   if (req.file) {
     console.log('Файл сохранен:', req.file.path);
@@ -73,7 +95,25 @@ app.get('/image/:filename', (req, res) => {
     }
   });
 });
+app.get('/api/routes', async (req, res) => {
+  const { startLat, startLng, endLat, endLng } = req.query;
+  const directionsApiUrl = `https://maps.googleapis.com/maps/api/directions/json?origin=${startLat},${startLng}&destination=${endLat},${endLng}&mode=driving&alternatives=true&key=AIzaSyAfZm8YP3fWLPMbQU8DCc0s_9TLeSwKjJE`;
 
+  try {
+    const response = await fetch(directionsApiUrl);
+    const data = await response.json();
+
+    if (data.status === 'OK') {
+      // Возвращаем количество возможных маршрутов
+      res.json({ routeCount: data.routes.length });
+    } else {
+      res.status(500).json({ error: 'Failed to get directions', details: data.error_message });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
 
 app.post('/register', async (req, res) => {
   console.log('register')

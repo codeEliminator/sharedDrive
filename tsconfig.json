@@ -21,6 +21,6 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/context/UserContext.tsx"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/context/UserContext.tsx", "src/app/(App)/GoogleMaps/GoogleMaps.jsx", "src/app/(App)/(Login)/rideCreator/AutocompleteInput.jsx"],
   "exclude": ["node_modules"]
 }

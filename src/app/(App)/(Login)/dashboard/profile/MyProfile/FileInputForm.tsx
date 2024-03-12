@@ -37,6 +37,7 @@ const FileInputForm :  React.FC<Props> = ({setActive}) => {
   
       if (response.ok) {
         alert('Upload successful');
+        setActive(false)
       } else {
         alert('Error');
       }
