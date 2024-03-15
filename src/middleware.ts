@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export function middleware(req: NextRequest) {
-  const publicBasePaths = ['/', '/authorization', '/registration'];
+  const publicBasePaths = ['/', '/authorization', '/registration', '/routes'];
   const path = req.nextUrl.pathname;
 
   const isPublicPath = publicBasePaths.some(basePath => path.startsWith(basePath));

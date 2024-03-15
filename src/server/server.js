@@ -51,6 +51,7 @@ const tripSchema = new mongoose.Schema({
   selectedRouteIndex: Number,
   passengerCount: Number,
   userRandomBytes: String,
+  done: Boolean
 },
 {
   collection: "TripSchema"
@@ -70,26 +71,57 @@ const User = mongoose.model('User', userSchema);
 const Trip = mongoose.model('Trip', tripSchema);
 
 app.get('/get-user/', async (req, res)=>{
-  console.log('get-user')
   try{
     const user = await User.findOne({randomBytes: req.query.randomBytes})
     if(user){
       return res.status(200).json(user)
     }
-    return res.status(404).json([])
+    return res.status(404).json()
   }
   catch(err){
     return res.status(500)
   }
 })
+app.post('/mark-ride-done', async (req, res)=>{
+  try{
+    const trip = await Trip.findOne(req.body)
+    if(trip){
+      if(trip.done == false){
+        trip.done = true
+        await trip.save()
+        return res.sendStatus(200)
+      }
+      return res.sendStatus(404)
+    }
+  }
+  catch(err){
+    return res.sendStatus(500)
+  }
+})
 app.post('/api/trips/', async (req, res)=> {
   try{
-    const newTrip = new Trip(req.body)
+    const newTrip = new Trip({...req.body, done: false})
     await newTrip.save(); 
     res.status(201).json({ message: 'Trip Added', status: 201 });
   } catch (error) {
     res.status(500).json({ message: 'Ошибка при Trip Added', error: error.message });
   }
+})
+app.get('/api/get-user-trips', async (req, res)=>{
+  try{
+    const user = await User.findOne({randomBytes: req.query.randomBytes})
+    if(user){
+      const userTrips = await Trip.find({userEmail: user.email})
+      if(userTrips){
+        return res.status(200).json(userTrips)
+      }
+      return res.status(404).json()
+    }
+  }
+  catch(err){
+    return res.status(500)
+  }
+
 })
 app.post('/upload', upload.single('file'), (req, res) => {
   if (req.file) {

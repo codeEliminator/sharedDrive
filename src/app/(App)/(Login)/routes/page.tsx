@@ -10,6 +10,11 @@ const Routes = () => {
   const [passengerCount, setPassengerCount] = useState(useSearchParams().get('passengerCount'))
   const [date, setDate] = useState(useSearchParams().get('date'))
   const [trips, setTrips] = useState([])
+  const showAlert = (message: string) => {
+    alert(message);
+    router.refresh()
+  };
+
   useEffect(()=>{
     const getTripsWithData = async () => {
       const response = await fetch(`http://localhost:2525/api/get-routes-date?startLocation=${startLocation}&endLocation=${endLocation}&passengerCount=${passengerCount}&date=${date}`)
@@ -18,15 +23,14 @@ const Routes = () => {
     }
     getTripsWithData()
   },[])
-  console.log(trips)
   return (
   
    <>
     {
-      !trips ? <div>No Trips found</div>
+      trips.length == 0 ? <div>No Trips found</div>
       :
       trips.map((tripItem, idx) => (  
-        <RouteView tripItem={tripItem} key={idx}></RouteView>
+        <RouteView tripItem={tripItem} key={idx} showAlert={showAlert}></RouteView>
         ))
     }
    </>
