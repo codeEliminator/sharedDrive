@@ -54,7 +54,7 @@ const MyProfile = () => {
       <div className='w-3/5 flex items-center justify-center mt-5'>
         <ul className='list-none w-full'>
           <li>
-            <Link href='/dashboard/profile/profileView'>
+            <Link href={`/profileView?user=${user?.randomBytes}`}>
               <div className='flex flex-row justify-between p-6 rounded-full items-center hover:bg-slate-300 ease-out duration-150  hover:p-10 cursor-pointer '>
                 <span className='flex flex-col'>
                   <span className='text-3xl '>{user?.name}</span>

@@ -2,6 +2,8 @@
 import React, { useState } from 'react';
 import GoogleMap from '../../GoogleMaps/GoogleMaps';
 import { useUser } from '@/context/UserContext';
+import PlusSvg from '../../helpers/Plus-svg';
+import MinusSvg from '../../helpers/Minus-svg';
 
 const RideCreator = () => {
   const {user} = useUser()
@@ -14,7 +16,10 @@ const RideCreator = () => {
   const [zoom, setZoom] = useState(10)
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
+  const [passengerCount, setPassengerCount] = useState(1)
   const today = new Date().toISOString().split('T')[0];
+  const incrementScore = () => setPassengerCount(passengerCount + 1);
+  const decrementScore = () => passengerCount == 1 ? null : setPassengerCount(passengerCount - 1);
 
   const getGeoCodeUrl = (address: string) => `https://maps.googleapis.com/maps/api/geocode/json?address=${address}&key=AIzaSyAfZm8YP3fWLPMbQU8DCc0s_9TLeSwKjJE`;
   const fetchRouteOptions = async (startLocation: { lat: null | Number, lng: null | Number }, endLocation: { lat: null | Number, lng: null | Number }) => {
@@ -34,6 +39,7 @@ const RideCreator = () => {
   const submitTrip = async () => {
     const userName = user?.name
     const userEmail = user?.email
+    const userRandomBytes = user?.randomBytes
     const tripData = {
       userEmail,
       userName,
@@ -42,6 +48,8 @@ const RideCreator = () => {
       startAddress,
       endAddress,
       selectedRouteIndex,
+      userRandomBytes,
+      passengerCount,
     };
   
     try {
@@ -124,17 +132,17 @@ const RideCreator = () => {
               What Date and What hour?
             </div>
             <div>
-            <label htmlFor="date" className="block text-sm font-medium text-gray-700">Date</label>
-            <input
-              type="date"
-              id="date"
-              name="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-              min={today} // Устанавливаем минимально допустимую дату на сегодня
-              required
-            />
+              <label htmlFor="date" className="block text-sm font-medium text-gray-700">Date</label>
+              <input
+                type="date"
+                id="date"
+                name="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                min={today}
+                required
+              />
             </div>
             <div>
               <label htmlFor="time" className="block text-sm font-medium text-gray-700">Time</label>
@@ -147,6 +155,14 @@ const RideCreator = () => {
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                 required
               />
+            </div>
+            <div tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box mt-3">
+              <div className='flex flex-row justify-center items-center p-2'>
+                <span className='text-xl'>Passengers: </span>
+                <div className='ml-2 cursor-pointer'><MinusSvg onClick={decrementScore}/></div>
+                <div className='ml-2 mr-2 text-xl'>{passengerCount}</div>
+                <div className='cursor-pointer'><PlusSvg onClick={incrementScore}/></div>
+              </div>
             </div>
             <button onClick={submitTrip} className='btn bg-primary-content w-full mt-5'>Submit Trip</button>
 

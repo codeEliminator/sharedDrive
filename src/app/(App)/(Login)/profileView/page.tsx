@@ -1,10 +1,28 @@
 'use client'
 import React, {useEffect, useState} from 'react'
-import { useUser } from '@/context/UserContext'
+// import { useUser } from '@/context/UserContext'
+import { useSearchParams, useRouter } from 'next/navigation'
+import { UserType } from '@/context/UserContext'
+import Loading from '../../loading'
+
 
 const ProfileView = () => {
   const [avatar, setAvatar] = useState('')
-  const {user} = useUser()
+  const router = useRouter()
+  const [user, setUser] = useState<UserType>()
+  const searchProps = useSearchParams()
+  const randomBytes = searchProps.get('user')
+  useEffect(()=>{
+    const getUser = async () => {
+      const response = await fetch(`http://localhost:2525/get-user?randomBytes=${randomBytes}`)
+      if(response.ok){
+        const data = await response.json()
+        console.log('Data: ', data)
+        setUser(data)
+      }
+    } 
+    getUser()
+  }, [])
   useEffect(()=>{
     const imageName = `${user?.name}____${user?.email}___${user?.randomBytes}.png`;
     const getAvatar = async () => {
@@ -15,6 +33,8 @@ const ProfileView = () => {
   }, [user])
   return (
     <>
+    {
+      user ? 
       <div className='flex items-center justify-center'>
         <div className='w-2/5 flex flex-col p-4'>
           <div className='flex flex-row justify-between'>
@@ -40,6 +60,11 @@ const ProfileView = () => {
           </div>
         </div>
       </div>
+      :
+      <Loading></Loading>
+
+    }
+      
     </>
     
   )

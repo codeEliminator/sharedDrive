@@ -6,11 +6,11 @@ import styles from './calendar.module.css';
 
 type CalendarComponentProps = {
   initialDate: string; 
+  date: Date | null | undefined;
+  setDate: (date: Date) => void;
 };
 
-const CalendarComponent: React.FC<CalendarComponentProps> = ({ initialDate }) => {
-  const [date, setDate] = useState<Date | null>();
-
+const CalendarComponent: React.FC<CalendarComponentProps> = ({ initialDate, setDate, date }) => {
   useEffect(() => {
     setDate(new Date(initialDate));
   }, [initialDate]);

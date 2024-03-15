@@ -49,6 +49,8 @@ const tripSchema = new mongoose.Schema({
   startAddress: String,
   endAddress: String,
   selectedRouteIndex: Number,
+  passengerCount: Number,
+  userRandomBytes: String,
 },
 {
   collection: "TripSchema"
@@ -67,6 +69,19 @@ const upload = multer({ storage: storage });
 const User = mongoose.model('User', userSchema);
 const Trip = mongoose.model('Trip', tripSchema);
 
+app.get('/get-user/', async (req, res)=>{
+  console.log('get-user')
+  try{
+    const user = await User.findOne({randomBytes: req.query.randomBytes})
+    if(user){
+      return res.status(200).json(user)
+    }
+    return res.status(404).json([])
+  }
+  catch(err){
+    return res.status(500)
+  }
+})
 app.post('/api/trips/', async (req, res)=> {
   try{
     const newTrip = new Trip(req.body)
@@ -95,6 +110,27 @@ app.get('/image/:filename', (req, res) => {
     }
   });
 });
+app.get('/api/get-routes-date/', async (req, res) => {
+  const { startLocation, endLocation, passengerCount, date } = req.query;
+  try {
+    const trips = await Trip.find({
+      startAddress: startLocation, 
+      endAddress: endLocation, 
+      startDate: new Date(new Date(date).setHours(0, 0, 0, 0)),
+      passengerCount: { $gte: passengerCount }
+    });
+    if (trips.length > 0) {
+      res.status(200).json(trips);
+    } else {
+      res.status(404).json([]);
+    }
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+
 app.get('/api/routes', async (req, res) => {
   const { startLat, startLng, endLat, endLng } = req.query;
   const directionsApiUrl = `https://maps.googleapis.com/maps/api/directions/json?origin=${startLat},${startLng}&destination=${endLat},${endLng}&mode=driving&alternatives=true&key=AIzaSyAfZm8YP3fWLPMbQU8DCc0s_9TLeSwKjJE`;
@@ -104,7 +140,6 @@ app.get('/api/routes', async (req, res) => {
     const data = await response.json();
 
     if (data.status === 'OK') {
-      // Возвращаем количество возможных маршрутов
       res.json({ routeCount: data.routes.length });
     } else {
       res.status(500).json({ error: 'Failed to get directions', details: data.error_message });

@@ -3,7 +3,6 @@ import React, {useState, useEffect} from 'react'
 import './routefinder.css'
 import CalendarComponent from '../Calendar/Calendar'
 import { getServerSideProps } from '../helpers/getServerSideProps'
-// import Passengers from '../Passengers/Passengers'
 import { useRouter } from 'next/navigation'
 import Loading from '../loading'
 import PlusSvg from '../helpers/Plus-svg';
@@ -16,7 +15,7 @@ export default function RouteFinder() {
   const [startLocation, setStartLocation] = useState('')
   const [endLocation, setEndLocation] = useState('')
   const [loading, setLoading] = useState<Boolean>(true)
-
+  const [date, setDate] = useState<Date | null>()
   const incrementScore = () => setPassengerCount(passengerCount + 1);
   const decrementScore = () => passengerCount == 1 ? null : setPassengerCount(passengerCount - 1);
   useEffect(()=>{
@@ -30,7 +29,11 @@ export default function RouteFinder() {
   }, [])
   const findRoute = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    router.push(`/routes?startLocation=${startLocation}&endLocation=${endLocation}&passengerCount=${passengerCount}`)
+    if(!startLocation || !endLocation || !passengerCount || !date){
+      alert('Not enough data input')
+      return
+    }
+    router.push(`/routes?startLocation=${startLocation}&endLocation=${endLocation}&passengerCount=${passengerCount}&date=${date}`)
   }
   return loading ?
   (<Loading />)
@@ -52,7 +55,7 @@ export default function RouteFinder() {
                 <input className = 'p-2 ' placeholder='To' onChange={(evt)=> setEndLocation(evt.target.value)}></input>
             </div>
             <div className="border-solid border-r-2 border-neutral-300 p-2">
-              <CalendarComponent initialDate={initialDate}></CalendarComponent>
+              <CalendarComponent initialDate={initialDate} setDate={setDate} date={date}></CalendarComponent>
             </div>
             <div className="border-solid border-r-2 border-neutral-300 p-4">
               <div className="dropdown dropdown-bottom dropdown-end size-full">
