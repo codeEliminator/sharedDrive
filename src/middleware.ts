@@ -2,16 +2,17 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export function middleware(req: NextRequest) {
-  const publicBasePaths = ['/', '/authorization', '/registration', '/routes'];
+  const publicBasePaths = ['/', '/authorization', '/registration', '/routes', '/profileView'];
   const path = req.nextUrl.pathname;
 
-  const isPublicPath = publicBasePaths.some(basePath => path.startsWith(basePath));
+  // const isPublicPath = publicBasePaths.some();
 
-  if (isPublicPath) {
+  if (publicBasePaths.includes(path)) {
+    console.log('middleware data: publicBasePaths ')
     return NextResponse.next();
   } else {
     if (req.cookies.has('authToken')) {
-      console.log('middleware');
+      console.log('middleware: authToken');
       const token = req.cookies.get('authToken');
       try {
         if (token) {

@@ -11,6 +11,7 @@ export type UserType = {
   emailVerified: boolean;
   rating: Number;
   randomBytes: String;
+  activeTrips: Array<String>;
 };
 
 export type UserContextType = {

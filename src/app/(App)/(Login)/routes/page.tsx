@@ -30,7 +30,7 @@ const Routes = () => {
       trips.length == 0 ? <div>No Trips found</div>
       :
       trips.map((tripItem, idx) => (  
-        <RouteView tripItem={tripItem} key={idx} showAlert={showAlert}></RouteView>
+        <RouteView tripItem={tripItem} key={idx} showAlert={showAlert} ></RouteView>
         ))
     }
    </>

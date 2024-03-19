@@ -34,12 +34,15 @@ mongoose.connect('mongodb+srv://admin:admin@accountdatabase.ddvfqdh.mongodb.net/
 const userSchema = new mongoose.Schema({
   name: String,
   email: String,
+  surname: String,
   password: String,
   phoneNumber: String,
   role: String,
   emailVerified: Boolean,
   rating: Number,
   randomBytes: String,
+  activeTrips: Array,
+  
 });
 const tripSchema = new mongoose.Schema({
   userEmail: String,
@@ -51,7 +54,9 @@ const tripSchema = new mongoose.Schema({
   selectedRouteIndex: Number,
   passengerCount: Number,
   userRandomBytes: String,
-  done: Boolean
+  done: Boolean,
+  passengers: Array,
+  tripId: String,
 },
 {
   collection: "TripSchema"
@@ -66,7 +71,6 @@ const storage = multer.diskStorage({
   }
 });
 const upload = multer({ storage: storage });
-
 const User = mongoose.model('User', userSchema);
 const Trip = mongoose.model('Trip', tripSchema);
 
@@ -82,6 +86,51 @@ app.get('/get-user/', async (req, res)=>{
     return res.status(500)
   }
 })
+app.post('/api/bookRide', async (req, res)=>{
+  const {user, tripItem} = req.body
+  try{
+    const trip = await Trip.findOne(tripItem)
+    if(trip){
+      if(trip.passengerCount == 0){
+        return res.status(401).json('No spaces left')  
+      }
+      else if(trip.passengers.includes(user.email)){
+        return res.status(402).json('You are already passenger')
+      }
+      else{
+        trip.passengers.push(user.email)
+        trip.passengerCount -= 1
+        await trip.save()
+        const userDB = await User.findOne({email: user.email})
+        userDB.activeTrips.push(trip.tripId)
+        await userDB.save()
+        return res.status(200).json('uspeshno')
+      }
+    }
+    return res.status(404).json('not found')
+  }
+  catch(err){
+    console.log(err)
+    return res.status(500)
+  }
+})
+app.get('/api/routes/get-user-trips', async (req, res) => {
+  try {
+    const activeTripsParam = req.query.activeTrips;
+    
+    const activeTrips = activeTripsParam ? JSON.parse(activeTripsParam) : [];
+    if (!Array.isArray(activeTrips)) {
+      return res.status(400).json({ message: 'Invalid active trips format' });
+    }
+    const tripsData = await Trip.find({
+      tripId: { $in: activeTrips }
+    });
+    return res.status(200).json(tripsData);
+  } catch (error) {
+    console.error('Error fetching active trips:', error);
+    return res.status(500).json({ message: 'Server error' });
+  }
+});
 app.post('/mark-ride-done', async (req, res)=>{
   try{
     const trip = await Trip.findOne(req.body)
@@ -100,7 +149,7 @@ app.post('/mark-ride-done', async (req, res)=>{
 })
 app.post('/api/trips/', async (req, res)=> {
   try{
-    const newTrip = new Trip({...req.body, done: false})
+    const newTrip = new Trip({...req.body, done: false, passengers: [], tripId: createRandomString(35)})
     await newTrip.save(); 
     res.status(201).json({ message: 'Trip Added', status: 201 });
   } catch (error) {
@@ -191,7 +240,7 @@ app.post('/register', async (req, res) => {
     }
     const hashedPassword = await bcrypt.hash(req.body.password, 10);
     req.body.password = hashedPassword
-    const newUser = new User({...req.body, emailVerified: false, rating: 5.0, randomBytes: createRandomString(30)});
+    const newUser = new User({...req.body, emailVerified: false, rating: 5.0, randomBytes: createRandomString(30), activeTrips: []});
     await newUser.save(); 
     res.status(201).json({ message: 'Пользователь зарегистрирован', status: 201 });
   } catch (error) {
@@ -208,7 +257,7 @@ app.post('/auth', async (req, res) => {
     }
     const isMatch = await ComparePasswords(password, user.password, bcrypt);
     if (isMatch) {
-      const token = jwt.sign({ id: user._id, name: user.name, role: user.role, email: user.email, password: user.password, phoneNumber: user.phoneNumber, randomBytes: user.randomBytes, rating: user.rating }, process.env.JWT_SECRET);
+      const token = jwt.sign({ id: user._id, name: user.name, role: user.role, email: user.email, password: user.password, phoneNumber: user.phoneNumber, randomBytes: user.randomBytes, rating: user.rating, activeTrips: user.activeTrips, surname: user.surname }, process.env.JWT_SECRET);
       res.cookie('authToken', token, {
         httpOnly: true,
       });
