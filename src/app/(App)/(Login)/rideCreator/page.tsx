@@ -51,26 +51,30 @@ const RideCreator = () => {
       userRandomBytes,
       passengerCount,
     };
-  
-    try {
-      const response = await fetch('http://localhost:2525/api/trips', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(tripData),
-      });
-  
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
+    if(user?.emailVerified == true){
+      try {
+        const response = await fetch('http://localhost:2525/api/trips', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(tripData),
+        });
+    
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+    
+        const result = await response.json();
+        console.log(result);
+        alert('Trip submitted successfully!');
+      } catch (error) {
+        console.error('Error submitting trip:', error);
+        alert('Failed to submit trip.');
       }
-  
-      const result = await response.json();
-      console.log(result);
-      alert('Trip submitted successfully!');
-    } catch (error) {
-      console.error('Error submitting trip:', error);
-      alert('Failed to submit trip.');
+    }
+    else{
+      alert('Verify identity/phone_number/email first')
     }
   };
   const handleSearchStart = async () => {

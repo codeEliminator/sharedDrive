@@ -32,7 +32,15 @@ const ProfileView = () => {
     const imageName = `${user?.name}____${user?.email}___${user?.randomBytes}.png`;
     const getAvatar = async () => {
       const response = await fetch(`http://localhost:2525/image/${imageName}`)
-      setAvatar(response.url)
+      if(response.ok){
+        setAvatar(response.url)
+        console.log('ok')
+      }
+      else{
+        console.log('neok')
+        setAvatar('/userProfile.png')
+      }
+      
     }
     const getTrips = async () => {
       const response = await fetch(`http://localhost:2525/api/get-user-trips?randomBytes=${randomBytes}`)
@@ -55,12 +63,15 @@ const ProfileView = () => {
           <div className='flex flex-row justify-between'>
             <div className='flex-row items-center'>
               <div>
-                {!avatar ? <img src='/userProfile.png' alt="" className='w-12 h-12 mr-2'/> : <img src={avatar} alt="" className='w-12 h-12 mr-2 rounded-full'/>}
+                <img src={avatar} alt="" className='w-12 h-12 mr-2 rounded-full mr-2'/>
               </div>
               <div className='text-3xl' >
                 <span>{user?.name}</span>
               </div>
             </div>
+            {
+              user.emailVerified == true && <div title='Email is Verified'><img src='./email-verified.png' className='w-10 h-10' title='Email Verified'/></div>
+            }
             <div id='rating' className='flex items-center justify-center'>
               <span className='text-2xl'>
                 <span className='italic'>rating: </span> 

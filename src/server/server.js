@@ -14,8 +14,7 @@ const {createRandomString} = require('./helpers/createRandomString')
 const fetch = require('node-fetch');
 require('./imageDetails')
 const nodemailer = require('nodemailer');
-const { randomBytes } = require('crypto');
-const { time } = require('console');
+
 const corsOptions = {
   origin: 'http://localhost:3000', 
   credentials: true, 
@@ -42,7 +41,8 @@ const userSchema = new mongoose.Schema({
   rating: Number,
   randomBytes: String,
   activeTrips: Array,
-  
+  identityVerified: Boolean,
+  phoneNumberVerified: Boolean,
 });
 const tripSchema = new mongoose.Schema({
   userEmail: String,
@@ -94,11 +94,11 @@ app.post('/api/bookRide', async (req, res)=>{
       if(trip.passengerCount == 0){
         return res.status(401).json('No spaces left')  
       }
-      else if(trip.passengers.includes(user.email)){
+      else if(trip.passengers.includes(user.randomBytes)){
         return res.status(402).json('You are already passenger')
       }
       else{
-        trip.passengers.push(user.email)
+        trip.passengers.push(user.randomBytes)
         trip.passengerCount -= 1
         await trip.save()
         const userDB = await User.findOne({email: user.email})
@@ -212,16 +212,42 @@ app.get('/api/get-routes-date/', async (req, res) => {
 });
 
 
+// app.get('/api/routes', async (req, res) => {
+//   const { startLat, startLng, endLat, endLng } = req.query;
+//   const directionsApiUrl = `https://maps.googleapis.com/maps/api/directions/json?origin=${startLat},${startLng}&destination=${endLat},${endLng}&mode=driving&alternatives=true&key=AIzaSyAfZm8YP3fWLPMbQU8DCc0s_9TLeSwKjJE`;
+
+//   try {
+//     const response = await fetch(directionsApiUrl);
+//     const data = await response.json();
+
+//     if (data.status === 'OK') {
+//       res.json({ routeCount: data.routes.length });
+//     } else {
+//       res.status(500).json({ error: 'Failed to get directions', details: data.error_message });
+//     }
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ error: 'Internal server error' });
+//   }
+// });
 app.get('/api/routes', async (req, res) => {
   const { startLat, startLng, endLat, endLng } = req.query;
-  const directionsApiUrl = `https://maps.googleapis.com/maps/api/directions/json?origin=${startLat},${startLng}&destination=${endLat},${endLng}&mode=driving&alternatives=true&key=AIzaSyAfZm8YP3fWLPMbQU8DCc0s_9TLeSwKjJE`;
+  const directionsApiUrl = `https://maps.googleapis.com/maps/api/directions/json?origin=${startLat},${startLng}&destination=${endLat},${endLng}&mode=driving&alternatives=true&key=YOUR_API_KEY`;
 
   try {
     const response = await fetch(directionsApiUrl);
     const data = await response.json();
 
     if (data.status === 'OK') {
-      res.json({ routeCount: data.routes.length });
+      const routes = data.routes.map(route => {
+        const durationText = route.legs.reduce((total, leg) => total + leg.duration.text, "");
+        const durationValue = route.legs.reduce((total, leg) => total + leg.duration.value, 0);
+        return {
+          durationText,
+          durationValue,
+        };
+      });
+      res.json({ routes });
     } else {
       res.status(500).json({ error: 'Failed to get directions', details: data.error_message });
     }
@@ -230,6 +256,7 @@ app.get('/api/routes', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
 
 app.post('/register', async (req, res) => {
   console.log('register')
@@ -240,7 +267,7 @@ app.post('/register', async (req, res) => {
     }
     const hashedPassword = await bcrypt.hash(req.body.password, 10);
     req.body.password = hashedPassword
-    const newUser = new User({...req.body, emailVerified: false, rating: 5.0, randomBytes: createRandomString(30), activeTrips: []});
+    const newUser = new User({...req.body, emailVerified: false, rating: 5.0, randomBytes: createRandomString(30), activeTrips: [], identityVerified: false, phoneNumberVerified: false});
     await newUser.save(); 
     res.status(201).json({ message: 'Пользователь зарегистрирован', status: 201 });
   } catch (error) {
@@ -257,7 +284,7 @@ app.post('/auth', async (req, res) => {
     }
     const isMatch = await ComparePasswords(password, user.password, bcrypt);
     if (isMatch) {
-      const token = jwt.sign({ id: user._id, name: user.name, role: user.role, email: user.email, password: user.password, phoneNumber: user.phoneNumber, randomBytes: user.randomBytes, rating: user.rating, activeTrips: user.activeTrips, surname: user.surname }, process.env.JWT_SECRET);
+      const token = jwt.sign({ id: user._id, name: user.name, role: user.role, email: user.email, password: user.password, phoneNumber: user.phoneNumber, randomBytes: user.randomBytes, rating: user.rating, activeTrips: user.activeTrips, surname: user.surname, identityVerified: user.identityVerified, phoneNumberVerified: user.phoneNumberVerified }, process.env.JWT_SECRET);
       res.cookie('authToken', token, {
         httpOnly: true,
       });
@@ -267,7 +294,7 @@ app.post('/auth', async (req, res) => {
     }
   }
   catch(error){
-    res.status(500).json({ message: 'Ошибка при регистрации пользователя', error: error.message , status: 500});
+    res.status(500).json({ message: 'Ошибка при авторизации пользователя', error: error.message , status: 500});
   }
 });
 app.get('/api/user', async (req, res) => {

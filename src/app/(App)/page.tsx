@@ -8,10 +8,10 @@ export default function Home() {
   return (
     <>
       <div className='flex justify-center items-center' style={{height: '400px'}}>
-        <img src='./baraban.png' alt="" style={{height:'450px', width: '100%', position: 'absolute', marginTop: '50px'}}/>
         <div className='z-100'>
           <RouteFinder  />
         </div>
+        <img src='./baraban.png' alt="" style={{height:'450px', width: '100%', position: 'absolute', marginTop: '50px'}} aria-disabled/>
       </div>
       <div className='mt-10'>
         <article className=' mt-28' > 

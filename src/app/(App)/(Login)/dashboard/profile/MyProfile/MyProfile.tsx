@@ -37,9 +37,14 @@ const MyProfile = () => {
     const imageName = `${user?.name}____${user?.email}___${user?.randomBytes}.png`;
     const getAvatar = async () => {
       const response = await fetch(`http://localhost:2525/image/${imageName}`)
-      setAvatar(response.url)
+      if(response.ok){
+        setAvatar(response.url)
+      }
+      else{
+        setAvatar('/userProfile.png')
+      }
+      getAvatar()
     }
-    getAvatar()
   }, [user])
   
   return (

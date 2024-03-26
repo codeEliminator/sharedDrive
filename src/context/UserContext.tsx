@@ -12,6 +12,9 @@ export type UserType = {
   rating: Number;
   randomBytes: String;
   activeTrips: Array<String>;
+  identityVerified: boolean;
+  phoneNumberVerified: boolean;
+  surname: string;
 };
 
 export type UserContextType = {
