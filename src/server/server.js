@@ -57,6 +57,7 @@ const tripSchema = new mongoose.Schema({
   done: Boolean,
   passengers: Array,
   tripId: String,
+  price: Number,
 },
 {
   collection: "TripSchema"

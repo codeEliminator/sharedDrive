@@ -16,6 +16,7 @@ const RideCreator = () => {
   const [zoom, setZoom] = useState(10)
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
+  const [price, setPrice] = useState<Number>(0)
   const [passengerCount, setPassengerCount] = useState(1)
   const today = new Date().toISOString().split('T')[0];
   const incrementScore = () => setPassengerCount(passengerCount + 1);
@@ -50,6 +51,7 @@ const RideCreator = () => {
       selectedRouteIndex,
       userRandomBytes,
       passengerCount,
+      price,
     };
     if(user?.emailVerified == true){
       try {
@@ -166,6 +168,12 @@ const RideCreator = () => {
                 <div className='ml-2 cursor-pointer'><MinusSvg onClick={decrementScore}/></div>
                 <div className='ml-2 mr-2 text-xl'>{passengerCount}</div>
                 <div className='cursor-pointer'><PlusSvg onClick={incrementScore}/></div>
+              </div>
+            </div>
+            <div>
+              <div className='flex flex-row justify-center items-center mt-4'>
+                <span className='text-xl'>Price: </span>
+                <input placeholder='200' type='number' className="ml-4 input input-bordered input-primary w-full " onChange={(evt)=>{setPrice(Number(evt.target.value))}}/>
               </div>
             </div>
             <button onClick={submitTrip} className='btn bg-primary-content w-full mt-5'>Submit Trip</button>

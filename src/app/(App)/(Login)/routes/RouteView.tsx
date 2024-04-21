@@ -148,7 +148,11 @@ const RouteView: React.FC<RouteComponentProps> = ({tripItem, showAlert}) => {
                 user?.email == tripItem.userEmail ? 
                 <button className="btn btn-outline btn-success" onClick={markTripDone} disabled={tripItem.done || isDisabled}>Mark As Done</button>
                 :
-                <button className="btn btn-outline btn-success" onClick={AddYourSelfToTrip}>Book</button>
+                tripItem.startDate < new Date() ? 
+                <div title='Unable to book/Out of date'> <button className="btn btn-outline btn-success" disabled>Book</button> </div>
+                :
+                <button className="btn btn-outline btn-success" onClick={AddYourSelfToTrip} disabled>Book</button>
+
               }
 
             </div>

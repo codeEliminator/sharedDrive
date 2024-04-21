@@ -8,6 +8,49 @@ import Loading from '../loading'
 import PlusSvg from '../helpers/Plus-svg';
 import MinusSvg from '../helpers/Minus-svg';
 
+declare global {
+  interface Window {
+    webkitSpeechRecognition: any;
+    SpeechRecognition: any;
+  }
+}
+
+// const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+// recognition.lang = 'ru-RU';
+// recognition.continuous = true;
+// // recognition.start();
+
+// navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+//   const audioContext = new AudioContext();
+//   const analyser = audioContext.createAnalyser();
+//   const microphone = audioContext.createMediaStreamSource(stream);
+//   microphone.connect(analyser);
+//   const dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+//   function checkAudio() {
+//     analyser.getByteTimeDomainData(dataArray);
+//     let sum = 0;
+//     for(let i = 0; i < dataArray.length; i++) {
+//       sum += dataArray[i];
+//     }
+//     let average = sum / dataArray.length;
+
+//     if (average > 255) {
+//       if (recognition.isPaused) {
+//         // recognition.start(); 
+//       }
+//     } else {
+//       if (!recognition.isPaused) {
+//         recognition.stop(); 
+//       }
+//     }
+//   }
+
+//   setInterval(checkAudio, 100);
+// }).catch(error => console.error(error));
+
+
+
 export default function RouteFinder() {
   const router = useRouter()
   const [passengerCount, setPassengerCount] = useState(1)
