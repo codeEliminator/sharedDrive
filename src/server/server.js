@@ -58,6 +58,7 @@ const tripSchema = new mongoose.Schema({
   passengers: Array,
   tripId: String,
   price: Number,
+  arrivalTime: String,
 },
 {
   collection: "TripSchema"
@@ -149,7 +150,15 @@ app.post('/mark-ride-done', async (req, res)=>{
   }
 })
 app.post('/api/trips/', async (req, res)=> {
+  
   try{
+    for (const key in req.body) {
+      if (typeof req.body[key] === 'string' && key !== 'userRandomBytes' && key!== 'userName') {
+        req.body[key] = req.body[key].toLowerCase();
+      } else {
+        req.body[key] = req.body[key];
+      }
+    }
     const newTrip = new Trip({...req.body, done: false, passengers: [], tripId: createRandomString(35)})
     await newTrip.save(); 
     res.status(201).json({ message: 'Trip Added', status: 201 });
@@ -192,14 +201,36 @@ app.get('/image/:filename', (req, res) => {
     }
   });
 });
+// app.get('/api/get-routes-date/', async (req, res) => {
+//   const { startLocation, endLocation, passengerCount, date } = req.query;
+//   try {
+//     const trips = await Trip.find({
+//       startAddress: startLocation.toLowerCase(), 
+//       endAddress: endLocation.toLowerCase(), 
+//       startDate: {$gte:new Date(new Date(date).setHours(0, 0, 0, 0))},
+//       passengerCount: { $gte: passengerCount }
+//     });
+//     if (trips.length > 0) {
+//       res.status(200).json(trips);
+//     } else {
+//       res.status(404).json([]);
+//     }
+//   } catch (err) {
+//     console.log(err);
+//     res.status(500).json({ message: 'Server error' });
+//   }
+// });
 app.get('/api/get-routes-date/', async (req, res) => {
   const { startLocation, endLocation, passengerCount, date } = req.query;
   try {
+    const decodedStartLocation = decodeURIComponent(startLocation).toLowerCase();
+    const decodedEndLocation = decodeURIComponent(endLocation).toLowerCase();
+    const formattedDate = new Date(new Date(date).setHours(0, 0, 0, 0));
     const trips = await Trip.find({
-      startAddress: startLocation, 
-      endAddress: endLocation, 
-      startDate: new Date(new Date(date).setHours(0, 0, 0, 0)),
-      passengerCount: { $gte: passengerCount }
+      startAddress: decodedStartLocation,
+      endAddress: decodedEndLocation,
+      startDate: { $gte: formattedDate },
+      passengerCount: { $gte: parseInt(passengerCount) }
     });
     if (trips.length > 0) {
       res.status(200).json(trips);
@@ -212,28 +243,23 @@ app.get('/api/get-routes-date/', async (req, res) => {
   }
 });
 
+const getDepartureTimestamp = (startTime) => {
+  const [hours, minutes] = startTime.split(':').map(Number);
+  const now = new Date();
+  const departureTime = new Date(now);
+  departureTime.setHours(hours, minutes, 0, 0);
 
-// app.get('/api/routes', async (req, res) => {
-//   const { startLat, startLng, endLat, endLng } = req.query;
-//   const directionsApiUrl = `https://maps.googleapis.com/maps/api/directions/json?origin=${startLat},${startLng}&destination=${endLat},${endLng}&mode=driving&alternatives=true&key=AIzaSyAfZm8YP3fWLPMbQU8DCc0s_9TLeSwKjJE`;
+  if (departureTime < now) {
+    departureTime.setDate(departureTime.getDate() + 1); 
+  }
 
-//   try {
-//     const response = await fetch(directionsApiUrl);
-//     const data = await response.json();
-
-//     if (data.status === 'OK') {
-//       res.json({ routeCount: data.routes.length });
-//     } else {
-//       res.status(500).json({ error: 'Failed to get directions', details: data.error_message });
-//     }
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: 'Internal server error' });
-//   }
-// });
+  return Math.floor(departureTime.getTime() / 1000);
+};
 app.get('/api/routes', async (req, res) => {
-  const { startLat, startLng, endLat, endLng } = req.query;
-  const directionsApiUrl = `https://maps.googleapis.com/maps/api/directions/json?origin=${startLat},${startLng}&destination=${endLat},${endLng}&mode=driving&alternatives=true&key=YOUR_API_KEY`;
+  const { startLat, startLng, endLat, endLng, startTime, date } = req.query;
+  const departureTime = getDepartureTimestamp(startTime, date); 
+
+  const directionsApiUrl = `https://maps.googleapis.com/maps/api/directions/json?origin=${startLat},${startLng}&destination=${endLat},${endLng}&departure_time=${departureTime}&mode=driving&alternatives=true&key=AIzaSyAfZm8YP3fWLPMbQU8DCc0s_9TLeSwKjJE`;
 
   try {
     const response = await fetch(directionsApiUrl);
@@ -257,6 +283,9 @@ app.get('/api/routes', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
+
+
 
 
 app.post('/register', async (req, res) => {

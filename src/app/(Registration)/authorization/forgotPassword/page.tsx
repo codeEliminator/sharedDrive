@@ -8,7 +8,7 @@ import CheckPasswordStrength from "@/app/(App)/helpers/CheckPasswordStrength"
 import Modal from '@/app/Modal/Modal';
 import { useRouter } from 'next/navigation';
 
-export default function page() {
+export default function forgotPassword() {
   const [email, setEmail] =  useState('')
   const [password, setPassword] = useState('')
   const [strength, setStrength] = useState(false)

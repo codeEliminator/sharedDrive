@@ -19,13 +19,15 @@ type RouteComponentProps = {
     userRandomBytes: String;
     done: boolean;
     passengers: Array<String>;
+    arrivalTime: string;
   },
   showAlert: (message: string) => void,
 }
-
+const synth = typeof window !== "undefined" ? window.speechSynthesis : null;
 const RouteView: React.FC<RouteComponentProps> = ({tripItem, showAlert}) => {
   const [avatar, setAvatar] = useState('')
   const [isDisabled, setIsDisabled] = useState<boolean>(true)
+  const [voiceAssist, setVoiceAssist] = useState(false)
   const {user} = useUser()
   const router = useRouter()
   const [passengersUsers, setPassengersUsers] = useState<Array<UserType>>([])
@@ -55,6 +57,13 @@ const RouteView: React.FC<RouteComponentProps> = ({tripItem, showAlert}) => {
       body: JSON.stringify({tripItem: tripItem, user: user})
     })
     if(response.ok){
+      if (synth && !synth.speaking && voiceAssist ) {
+        const utterance = new SpeechSynthesisUtterance(`Вы добавили себя в поездку из ${tripItem.startAddress} в ${tripItem.endAddress} на дату ${tripItem.startDate} в ${tripItem.startTime}`);
+        utterance.onend = () => {
+          console.log('speak work routeview');
+        };
+        synth.speak(utterance);
+      } 
       showAlert('You added yourself to this trip')
     }
     else{
@@ -90,8 +99,11 @@ const RouteView: React.FC<RouteComponentProps> = ({tripItem, showAlert}) => {
       else{
         setAvatar('/userProfile.png')
       }
-      
     }
+    if(localStorage.getItem('voiceAssist') == 'true'){
+      setVoiceAssist(true)
+    }
+    
     const CheckCondition = async () =>{
       const initialDate = await getServerSideProps()
       if(tripItem.startDate < new Date(initialDate)){
@@ -101,14 +113,17 @@ const RouteView: React.FC<RouteComponentProps> = ({tripItem, showAlert}) => {
     CheckCondition()
     getAvatar()
   }, [])
+  const uppLetter = (name: String) => {
+    return name.charAt(0).toUpperCase() + name.slice(1);
+  }
   return (
     <>
       <div className='flex w-full items-center justify-center mt-10'>
-        <div className='flex w-3/5 flex-col border-solid border-2 border-primary-content border-y-0 rounded bg-slate-100 p-2'>
+        <div className='flex w-3/5 flex-col border-solid border-2 border-primary-content border-t-0 rounded bg-slate-100 p-2'>
           <div className='flex flex-row justify-between'>
             <div className='flex flex-col items-center justify-center'>
               <span>{tripItem.startTime}</span>
-              <span className='text-xl'>{tripItem.startAddress}</span>
+              <span className='text-xl'>{uppLetter(tripItem.startAddress)}</span>
             </div>
             
             <div className='flex justify-center items-center flex-col'>
@@ -129,8 +144,8 @@ const RouteView: React.FC<RouteComponentProps> = ({tripItem, showAlert}) => {
             </div>
             
             <div className='flex flex-col items-center justify-center'>
-              <span>Ask from driver</span>
-              <span className='text-xl'>{tripItem.endAddress}</span>
+            <span > {tripItem.arrivalTime}</span>
+              <span className='text-xl'>{uppLetter(tripItem.endAddress)}</span>
             </div>
           </div>  
           <div className='flex flex-row justify-between'>
@@ -139,7 +154,7 @@ const RouteView: React.FC<RouteComponentProps> = ({tripItem, showAlert}) => {
               <Link href={`/profileView?user=${tripItem.userRandomBytes}`}>
                 <div className='flex flex-row items-center '>
                 {!avatar ? <img src='/userProfile.png' alt="" className='w-10 h-10 mr-2'/> : <img src={avatar} alt="" className='w-10 h-10 rounded-full mr-2'/>}
-                  <span className='text-xl hover:text-cyan-300 transition'>{tripItem.userName}</span>
+                  <span className='text-xl hover:text-cyan-300 transition'>{uppLetter(tripItem.userName)}</span>
                 </div>
               </Link>
             </div>
@@ -151,8 +166,9 @@ const RouteView: React.FC<RouteComponentProps> = ({tripItem, showAlert}) => {
                 tripItem.startDate < new Date() ? 
                 <div title='Unable to book/Out of date'> <button className="btn btn-outline btn-success" disabled>Book</button> </div>
                 :
-                <button className="btn btn-outline btn-success" onClick={AddYourSelfToTrip} disabled>Book</button>
-
+                <div title='book a ride'>
+                  <button className="btn btn-outline btn-success" onClick={AddYourSelfToTrip}>Book</button>
+                </div>
               }
 
             </div>

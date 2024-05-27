@@ -22,7 +22,7 @@ export default function RootLayout({
       <html lang="en" data-theme="light">
         <head>
           <script
-            src={`https://maps.googleapis.com/maps/api/js?key=AIzaSyAfZm8YP3fWLPMbQU8DCc0s_9TLeSwKjJE`}
+            src={`https://maps.googleapis.com/maps/api/js?key=AIzaSyAfZm8YP3fWLPMbQU8DCc0s_9TLeSwKjJE&libraries=places`}
             async
             defer
           ></script>  

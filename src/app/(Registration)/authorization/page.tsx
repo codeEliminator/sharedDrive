@@ -50,11 +50,16 @@ export default function Authorization() {
                 <div className='flex flex-col'>
                   <label className="input input-bordered flex items-center gap-2 my-2">
                     Email
-                    <input type="email" className="grow" placeholder="Your Email" onChange={(evt)=>setEmail(evt.target.value)}/>
+                    <div title='email'>
+                      <input type="email" className="grow" placeholder="Your Email" onChange={(evt)=>setEmail(evt.target.value)}/>
+                    </div>
+                    
                   </label>
                   <label className="input input-bordered flex items-center gap-2 my-2 ">
                     Password
-                    <Password onChange={(evt)=>{setPassword(evt.target.value)}} placeholder="Enter Password" feedback={false} toggleMask/>
+                    <div>
+                      <Password onChange={(evt)=>{setPassword(evt.target.value)}} placeholder="Enter Password" feedback={false} toggleMask/>
+                    </div>
                   </label>
                   <button className='btn btn-neutral' disabled={!email || !password} type='submit'>Log In</button>
                   {
@@ -70,7 +75,7 @@ export default function Authorization() {
                   <Link href={'/registration'}>
                     <div className='link text-lg text-blue-300 hover:text-blue-500'> Don't have an Account?</div>
                   </Link>
-                  <Link href={'/authorization/forgot-password'}>
+                  <Link href={'/authorization/forgotPassword'}>
                     <div className='link text-lg text-blue-300 hover:text-blue-500'>Forgot Password?</div>
                   </Link>
               </div>

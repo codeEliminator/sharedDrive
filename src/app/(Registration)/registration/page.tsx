@@ -69,25 +69,25 @@ export default function Registration() {
               <div className="text-xl">Welcome to Shared Drive</div>
             </div>
             <div className="flex flex-col">
-              <label className="input input-bordered flex items-center gap-2">
+              <label title="Name" className="input input-bordered flex items-center gap-2 mb-2">
                 Name
                 <input type="text" className="grow" placeholder="Artem" onChange={(evt)=>setName(evt.target.value)} />
               </label>
-              <label className="input input-bordered flex items-center gap-2">
+              <label title='Surname' className="input input-bordered flex items-center gap-2 my-2">
                 Surname
                 <input type="text" className="grow" placeholder="Gates" onChange={(evt)=>setSurname(evt.target.value)} />
               </label>
-              <label className="input input-bordered flex items-center gap-2 my-2">
+              <label title="Email" className="input input-bordered flex items-center gap-2 my-2">
                 Email
                 <input type="email" className="grow" placeholder="my@email.com" onChange={(evt)=>setEmail(evt.target.value)}/>
               </label>
-              <label className="input input-bordered flex items-center gap-2 my-2">
+              <label title="Password" className="input input-bordered flex items-center gap-2 my-2">
                 Password
                 <Password onChange={(evt)=>{
                   setStrength(CheckPasswordStrength(evt.target.value));setPassword(evt.target.value)
                   }} placeholder="Strong Password" toggleMask/>
               </label>
-              <label className="input input-bordered flex items-center gap-2 my-2">
+              <label title="Repeat Password" className="input input-bordered flex items-center gap-2 my-2">
                 Repeat Password
                 <input type="password" className="grow" placeholder="Strong Password" 
                 onChange={
@@ -104,26 +104,15 @@ export default function Registration() {
                 }
                 />
               </label>
-              <PhoneInput
-                placeholder="1234567890"
-                value={phoneNumber}
-                country={country.toLowerCase()}
-                onChange={setPhoneNumber}
-              />
-              <div className="mb-2">
-                <div>
-                  <span className="text-xl">Who are you?</span>
-                </div>
-                <label className="flex flex-row items-center">
-                  <span className="text-xl">Driver</span>
-                  <input type="radio" id='Driver' value='Driver' name="role" className="ml-2 h-4 w-4" onChange={(evt)=>handleChangeOption(evt)} />
-                </label>
-                <label className="flex flex-row items-center">
-                  <span className="text-xl">Passenger</span>
-                  <input type="radio" id='Passenger' value='Passenger' name="role" className="ml-2 h-4 w-4" onChange={(evt)=>handleChangeOption(evt)}/>
-                </label>
+              <div title="phone number" className="my-2">
+                <PhoneInput
+                  placeholder="1234567890"
+                  value={phoneNumber}
+                  country={'ua'}
+                  onChange={setPhoneNumber}
+                />
               </div>
-              <button className="btn btn-neutral" disabled={!name || !surname || !email || !password || !passwordCheck || password !== passwordCheck || !phoneNumber || !strength || !role }>Register</button>
+              <button className="btn btn-neutral my-2" disabled={!name || !surname || !email || !password || !passwordCheck || password !== passwordCheck || !phoneNumber || !strength }>Register</button>
             </div>
             {
               status == null ? null 

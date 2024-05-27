@@ -5,7 +5,7 @@ import { UserProvider } from "@/context/UserContext";
 const monoton = Montserrat({subsets: ['latin']});
 
 export const metadata: Metadata = {
-  title: "Registration",
+  title: "Auth",
   description: "Shared Drive project",
 };
 

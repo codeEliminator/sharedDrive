@@ -1,46 +1,59 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import GoogleMap from '../../GoogleMaps/GoogleMaps';
 import { useUser } from '@/context/UserContext';
 import PlusSvg from '../../helpers/Plus-svg';
 import MinusSvg from '../../helpers/Minus-svg';
 
 const RideCreator = () => {
-  const {user} = useUser()
+  const { user } = useUser();
   const [startAddress, setStartAddress] = useState('');
   const [endAddress, setEndAddress] = useState('');
   const [startLocation, setStartLocation] = useState({ lat: null, lng: null });
   const [endLocation, setEndLocation] = useState({ lat: null, lng: null });
   const [selectedRouteIndex, setSelectedRouteIndex] = useState(0);
   const [routeCount, setRouteCount] = useState(0);
-  const [zoom, setZoom] = useState(10)
+  const [zoom, setZoom] = useState(10);
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
-  const [price, setPrice] = useState<Number>(0)
-  const [passengerCount, setPassengerCount] = useState(1)
+  const [price, setPrice] = useState<Number>(0);
+  const [passengerCount, setPassengerCount] = useState(1);
+  const [arrivalTime, setArrivalTime] = useState('');
   const today = new Date().toISOString().split('T')[0];
+
   const incrementScore = () => setPassengerCount(passengerCount + 1);
-  const decrementScore = () => passengerCount == 1 ? null : setPassengerCount(passengerCount - 1);
+  const decrementScore = () => passengerCount === 1 ? null : setPassengerCount(passengerCount - 1);
 
   const getGeoCodeUrl = (address: string) => `https://maps.googleapis.com/maps/api/geocode/json?address=${address}&key=AIzaSyAfZm8YP3fWLPMbQU8DCc0s_9TLeSwKjJE`;
-  const fetchRouteOptions = async (startLocation: { lat: null | Number, lng: null | Number }, endLocation: { lat: null | Number, lng: null | Number }) => {
+
+  const fetchRouteOptions = async (startLocation: { lat: null | Number, lng: null | Number }, endLocation: { lat: null | Number, lng: null | Number }, time: string) => {
     try {
-      const response = await fetch(`http://localhost:2525/api/routes?startLat=${startLocation.lat}&startLng=${startLocation.lng}&endLat=${endLocation.lat}&endLng=${endLocation.lng}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch route options');
+      if (startLocation.lat && startLocation.lng && endLocation.lat && endLocation.lng && time) {
+        const response = await fetch(`http://localhost:2525/api/routes?startLat=${startLocation.lat}&startLng=${startLocation.lng}&endLat=${endLocation.lat}&endLng=${endLocation.lng}&startTime=${time}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch route options');
+        }
+        const data = await response.json();
+        setRouteCount(data.routes.length);
+        
+        const durationInSeconds = data.routes[0]?.durationValue || 0;
+        const startDateTime = new Date(`${date}T${time}`);
+        const arrivalDateTime = new Date(startDateTime.getTime() + durationInSeconds * 1000);
+        const arrivalTimeString = arrivalDateTime.toLocaleString('uk-UA', { dateStyle: 'short', timeStyle: 'short' });
+
+        setArrivalTime(arrivalTimeString);
+        return data.routes.length;
       }
-      const data = await response.json();
-      setRouteCount(data.routeCount)
-      return data.routeCount; 
     } catch (error) {
       console.error("Error fetching route options:", error);
       return 0;
     }
   };
+
   const submitTrip = async () => {
-    const userName = user?.name
-    const userEmail = user?.email
-    const userRandomBytes = user?.randomBytes
+    const userName = user?.name;
+    const userEmail = user?.email;
+    const userRandomBytes = user?.randomBytes;
     const tripData = {
       userEmail,
       userName,
@@ -52,8 +65,9 @@ const RideCreator = () => {
       userRandomBytes,
       passengerCount,
       price,
+      arrivalTime,
     };
-    if(user?.emailVerified == true){
+    if (user?.emailVerified === true) {
       try {
         const response = await fetch('http://localhost:2525/api/trips', {
           method: 'POST',
@@ -62,11 +76,11 @@ const RideCreator = () => {
           },
           body: JSON.stringify(tripData),
         });
-    
+
         if (!response.ok) {
           throw new Error('Network response was not ok');
         }
-    
+
         const result = await response.json();
         console.log(result);
         alert('Trip submitted successfully!');
@@ -74,11 +88,11 @@ const RideCreator = () => {
         console.error('Error submitting trip:', error);
         alert('Failed to submit trip.');
       }
-    }
-    else{
-      alert('Verify identity/phone_number/email first')
+    } else {
+      alert('Verify identity/phone_number/email first');
     }
   };
+
   const handleSearchStart = async () => {
     const geocodeUrl = getGeoCodeUrl(startAddress);
     try {
@@ -87,7 +101,7 @@ const RideCreator = () => {
       if (data.status === 'OK') {
         const { lat, lng } = data.results[0].geometry.location;
         setStartLocation({ lat, lng });
-        setZoom(14)
+        setZoom(14);
       } else {
         alert('Start address not found');
       }
@@ -104,12 +118,19 @@ const RideCreator = () => {
       if (data.status === 'OK') {
         const { lat, lng } = data.results[0].geometry.location;
         setEndLocation({ lat, lng });
-        fetchRouteOptions(startLocation, endLocation)
+        fetchRouteOptions(startLocation, endLocation, time); // Додамо параметр часу
       } else {
         alert('End address not found');
       }
     } catch (error) {
       console.error('Error fetching end location:', error);
+    }
+  };
+
+  const handleTimeChange = async (newTime: string) => {
+    setTime(newTime);
+    if (startLocation.lat && startLocation.lng && endLocation.lat && endLocation.lng) {
+      fetchRouteOptions(startLocation, endLocation, newTime); // Додамо параметр часу
     }
   };
 
@@ -125,77 +146,77 @@ const RideCreator = () => {
 
   return (
     <div className='flex justify-center items-center mt-24 flex-row'>
-        <div className='flex flex-row w-full items-center justify-center'>
-          <div className='flex w-1/5 flex-col mr-2'>
-            <div className='text-4xl'>Where Are You Going From?</div>
-            <input type="text" placeholder="Type here" className="my-2 input input-bordered input-primary w-full " onChange={(e) => setStartAddress(e.target.value)} />
-            <button onClick={handleSearchStart} className='btn bg-primary-content w-full'>Search Start</button>
+      <div className='flex flex-row w-full items-center justify-center'>
+        <div className='flex w-1/5 flex-col mr-2'>
+          <div className='text-4xl'>Where Are You Going From?</div>
+          <input type="text" placeholder="Type here" className="my-2 input input-bordered input-primary w-full " onChange={(e) => setStartAddress(e.target.value)} />
+          <button onClick={handleSearchStart} className='btn bg-primary-content w-full'>Search Start</button>
 
-            <div className='text-4xl mt-10'>Where Are You Going To?</div>
-            <input type="text" placeholder="Type here" className="my-2 input input-bordered input-primary w-full " onChange={(e) => setEndAddress(e.target.value)} />
-            <button onClick={handleSearchEnd} className='btn bg-primary-content w-full'>Search End</button>
-            <div className='mt-10'>
-              What Date and What hour?
-            </div>
-            <div>
-              <label htmlFor="date" className="block text-sm font-medium text-gray-700">Date</label>
-              <input
-                type="date"
-                id="date"
-                name="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                min={today}
-                required
-              />
-            </div>
-            <div>
-              <label htmlFor="time" className="block text-sm font-medium text-gray-700">Time</label>
-              <input
-                type="time"
-                id="time"
-                name="time"
-                value={time}
-                onChange={(e) => setTime(e.target.value)}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                required
-              />
-            </div>
-            <div tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box mt-3">
-              <div className='flex flex-row justify-center items-center p-2'>
-                <span className='text-xl'>Passengers: </span>
-                <div className='ml-2 cursor-pointer'><MinusSvg onClick={decrementScore}/></div>
-                <div className='ml-2 mr-2 text-xl'>{passengerCount}</div>
-                <div className='cursor-pointer'><PlusSvg onClick={incrementScore}/></div>
-              </div>
-            </div>
-            <div>
-              <div className='flex flex-row justify-center items-center mt-4'>
-                <span className='text-xl'>Price: </span>
-                <input placeholder='200' type='number' className="ml-4 input input-bordered input-primary w-full " onChange={(evt)=>{setPrice(Number(evt.target.value))}}/>
-              </div>
-            </div>
-            <button onClick={submitTrip} className='btn bg-primary-content w-full mt-5'>Submit Trip</button>
-
-            <div className='mt-5'>
-              {routeCount > 0 && renderRouteOptions()}
-            </div>
-            
+          <div className='text-4xl mt-10'>Where Are You Going To?</div>
+          <input type="text" placeholder="Type here" className="my-2 input input-bordered input-primary w-full " onChange={(e) => setEndAddress(e.target.value)} />
+          <button onClick={handleSearchEnd} className='btn bg-primary-content w-full'>Search End</button>
+          <div className='mt-10'>
+            What Date and What hour?
           </div>
-          <div className='w-3/5'>
-            <GoogleMap
-              lat={startLocation.lat || 34}
-              lng={startLocation.lng || 78}
-              zoom={zoom}
-              startLocation={startLocation.lat ? startLocation : null}
-              endLocation={endLocation.lat ? endLocation : null}
-              selectedRouteIndex={selectedRouteIndex}
+          <div>
+            <label htmlFor="date" className="block text-sm font-medium text-gray-700">Date</label>
+            <input
+              type="date"
+              id="date"
+              name="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              min={today}
+              required
             />
           </div>
+          <div>
+            <label htmlFor="time" className="block text-sm font-medium text-gray-700">Time</label>
+            <input
+              type="time"
+              id="time"
+              name="time"
+              value={time}
+              onChange={(e) => handleTimeChange(e.target.value)}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              required
+            />
+          </div>
+          <div className=''>
+            <span>Approximate time you will be there: {arrivalTime}</span>
+          </div>
+          <div tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box mt-3">
+            <div className='flex flex-row justify-center items-center p-2'>
+              <span className='text-xl'>Passengers: </span>
+              <div className='ml-2 cursor-pointer'><MinusSvg onClick={decrementScore} /></div>
+              <div className='ml-2 mr-2 text-xl'>{passengerCount}</div>
+              <div className='cursor-pointer'><PlusSvg onClick={incrementScore} /></div>
+            </div>
+          </div>
+          <div>
+            <div className='flex flex-row justify-center items-center mt-4'>
+              <span className='text-xl'>Price: </span>
+              <input placeholder='200' type='number' className="ml-4 input input-bordered input-primary w-full " onChange={(evt) => { setPrice(Number(evt.target.value)) }} />
+            </div>
+          </div>
+          {/* <div className='mt-5'>
+            {routeCount > 0 && renderRouteOptions()}
+          </div> */}
+          <button onClick={submitTrip} className='btn bg-primary-content w-full mt-5'>Submit Trip</button>
+        </div>
+        <div className='w-3/5'>
+          <GoogleMap
+            lat={startLocation.lat || 34}
+            lng={startLocation.lng || 78}
+            zoom={zoom}
+            startLocation={startLocation.lat ? startLocation : null}
+            endLocation={endLocation.lat ? endLocation : null}
+            selectedRouteIndex={selectedRouteIndex}
+          />
         </div>
       </div>
-    
+    </div>
   );
 };
 

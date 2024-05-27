@@ -96,8 +96,7 @@ const ProfileView = () => {
       :
       <Loading></Loading>
 
-    }
-      
+    } 
     </>
     
   )
